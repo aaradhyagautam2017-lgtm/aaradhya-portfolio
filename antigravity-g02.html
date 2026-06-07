@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>G2 - Project Detail Framework</title>
+<link rel="stylesheet" href="typography.css">
+<style>
+    /* ━━━━━━━━━━━━━━━━━━
+       CORE RENDERING
+       ━━━━━━━━━━━━━━━━━━ */
+    html, body {
+        margin: 0;
+        padding: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: transparent;
+    }
+    body {
+        background: transparent;
+        color: #ffffff;
+        overflow: hidden;
+    }
+
+    #bg-video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        object-fit: cover;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    #portfolio-layout {
+        position: absolute;
+        width: 1440px;
+        height: 900px;
+        top: 50%;
+        left: 50%;
+        transform-origin: 720px 415px;
+        transform: translate(-720px, -415px) scale(1.25);
+        pointer-events: auto;
+    }
+    
+    #portfolio-layout::before {
+        content: '';
+        position: absolute;
+        inset: -150px;
+        background: radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.035) 0%, rgba(59, 130, 246, 0.02) 50%, transparent 80%);
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━
+       GLASS SYSTEM & DEPTH
+       ━━━━━━━━━━━━━━━━━━ */
+    .glass-panel {
+        position: relative; 
+        background: linear-gradient(
+          135deg,
+          rgba(20, 15, 30, 0.45) 0%,
+          rgba(10, 5, 15, 0.35) 50%,
+          rgba(0, 0, 5, 0.25) 100%
+        ) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-shadow:
+          inset 0 1px 1px rgba(255, 255, 255, 0.20),
+          inset 0 0 12px rgba(139, 92, 246, 0.10),
+          0 12px 48px rgba(0,0,0,0.45) !important;
+        opacity: 1 !important;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    .glass-panel::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: 
+            radial-gradient(circle at 50% 84px, rgba(139, 92, 246, 0.04) 0%, transparent 60%),
+            radial-gradient(circle at 50% 490px, rgba(139, 92, 246, 0.02) 0%, transparent 50%) !important;
+        pointer-events: none;
+        opacity: 0.4 !important;
+        animation: ambientLuminance 24s ease-in-out infinite alternate;
+        z-index: 0;
+    }
+
+    @keyframes ambientLuminance {
+        0% { opacity: 0.3; }
+        100% { opacity: 0.6; }
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━
+       HUD INSTRUMENTATION
+       ━━━━━━━━━━━━━━━━━━ */
+    .hud-corner { 
+        position: absolute; 
+        width: 8px; 
+        height: 8px; 
+        border: 1px solid rgba(255, 255, 255, 0.40);
+        pointer-events: none;
+        z-index: 2;
+    }
+    .hud-corner.tl { top: 12px; left: 12px; border-right: none; border-bottom: none; }
+    .hud-corner.tr { top: 12px; right: 12px; border-left: none; border-bottom: none; }
+    .hud-corner.bl { bottom: 12px; left: 12px; border-right: none; border-top: none; }
+    .hud-corner.br { bottom: 12px; right: 12px; border-left: none; border-top: none; }
+
+    .btn-corner {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        border: 1px solid rgba(255, 255, 255, 0.40);
+        pointer-events: none;
+        z-index: 2;
+        transition: border-color 250ms ease;
+    }
+    .btn-corner.tl { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+    .btn-corner.tr { top: -1px; right: -1px; border-left: none; border-bottom: none; }
+    .btn-corner.bl { bottom: -1px; left: -1px; border-right: none; border-top: none; }
+    .btn-corner.br { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+
+    /* ━━━━━━━━━━━━━━━━━━
+       G2 ARCHITECTURE
+       ━━━━━━━━━━━━━━━━━━ */
+    
+    #g2-container {
+        position: absolute;
+        width: 1060px;
+        height: 630px;
+        top: 100px;
+        left: 190px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    #utility-bar {
+        width: 100%;
+        height: 56px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 20px;
+        padding: 0 24px;
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.85);
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━
+       HERO CAROUSEL
+       ━━━━━━━━━━━━━━━━━━ */
+
+    #hero-panel {
+        width: 100%;
+        flex: 1; /* Automatically takes remaining space (~334px) */
+        border-radius: 14px;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .hero-carousel {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        display: flex;
+        width: 100%;
+        height: 100%;
+        transition: transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .carousel-slide {
+        width: 100%;
+        height: 100%;
+        flex-shrink: 0;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(20, 15, 30, 0.2);
+    }
+    
+    .placeholder-media {
+        font-family: var(--font-mono);
+        color: rgba(255, 255, 255, 0.2);
+        font-size: 14px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+    }
+
+    .carousel-controls {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 3;
+    }
+    
+    .carousel-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent !important;
+        border: none !important;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 250ms cubic-bezier(0.16, 1, 0.3, 1);
+        color: rgba(255, 255, 255, 0.35) !important;
+        pointer-events: auto;
+        font-size: 24px;
+        font-family: var(--font-primary);
+        font-weight: 300;
+        padding: 12px;
+    }
+    .carousel-btn:hover {
+        color: rgba(255, 255, 255, 0.90) !important;
+    }
+    .carousel-btn.prev { left: 24px; }
+    .carousel-btn.next { right: 24px; }
+
+
+    /* ━━━━━━━━━━━━━━━━━━
+       BOTTOM PANELS
+       ━━━━━━━━━━━━━━━━━━ */
+
+    #bottom-panels {
+        display: flex;
+        gap: 20px;
+        width: 100%;
+        height: 200px;
+        flex-shrink: 0;
+    }
+
+    .bottom-panel {
+        height: 100%;
+        border-radius: 12px;
+        padding: 20px 24px;
+        position: relative;
+    }
+
+    #meta-panel {
+        width: 240px;
+    }
+    
+    #overview-panel {
+        flex: 1; /* Automatically takes the space of Nav panel */
+        padding-top: 16px;
+    }
+
+    .panel-label {
+        font-size: 8px;
+        color: rgba(255, 255, 255, 0.36);
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        font-family: var(--font-mono);
+        margin-bottom: 20px;
+    }
+
+    .meta-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 12px;
+    }
+    .meta-key {
+        font-family: var(--font-mono);
+        font-size: 8px;
+        color: rgba(255,255,255,0.36);
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+    }
+    .meta-val {
+        font-family: var(--font-primary);
+        font-size: 11px;
+        color: rgba(255,255,255,0.82);
+    }
+
+    .overview-text {
+        font-family: var(--font-primary);
+        font-size: 12px;
+        font-weight: 400;
+        color: rgba(255, 255, 255, 0.7);
+        line-height: 1.5;
+        margin-bottom: 10px;
+    }
+</style>
+</head>
+<body>
+
+<video id="bg-video" src="./assets/background.mp4" autoplay muted loop playsinline></video>
+
+<div id="portfolio-layout">
+
+    <div id="g2-container">
+        <!-- UTILITY BAR (G4 Architecture) -->
+        <div id="utility-bar" class="glass-panel text-hud">
+            <div style="display: flex; align-items: center; gap: 12px; z-index: 2;">
+                <div class="text-title" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; font-size: 14px; color: rgba(255,255,255,0.8); font-weight: 500; line-height: 1; cursor: pointer;">
+                    ←
+                </div>
+            </div>
+            
+            <span style="position: absolute; left: 50%; transform: translateX(-50%); text-align: center; pointer-events: none; font-family: var(--font-mono); font-size: 10px; color: rgba(255,255,255,0.45); letter-spacing: 0.16em;">01 / 04</span>
+            
+            <div style="position: absolute; right: 24px; display: flex; align-items: center; gap: 12px; z-index: 2;">
+                <span style="font-family: var(--font-primary); font-size: 11px; color: rgba(255,255,255,0.5);">Prev</span>
+                <span style="color: rgba(255,255,255,0.2); font-size: 10px;">|</span>
+                <span style="font-family: var(--font-primary); font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.9);">Next</span>
+            </div>
+        </div>
+
+        <!-- HERO PANEL / CAROUSEL -->
+        <div id="hero-panel" class="glass-panel">
+            <div class="hud-corner tl"></div>
+            <div class="hud-corner tr"></div>
+            <div class="hud-corner bl"></div>
+            <div class="hud-corner br"></div>
+
+            <div class="hero-carousel">
+                <div class="carousel-slide"></div>
+                <div class="carousel-slide"></div>
+                <div class="carousel-slide"></div>
+            </div>
+
+            <div class="carousel-controls">
+                <button class="carousel-btn prev" onclick="prevSlide()">‹</button>
+                <button class="carousel-btn next" onclick="nextSlide()">›</button>
+            </div>
+        </div>
+
+        <!-- BOTTOM PANELS (2 Containers) -->
+        <div id="bottom-panels">
+            <!-- META PANEL (LEFT) -->
+            <div id="meta-panel" class="glass-panel bottom-panel">
+                <div class="hud-corner tl"></div>
+                <div class="hud-corner tr"></div>
+                <div class="hud-corner bl"></div>
+                <div class="hud-corner br"></div>
+                
+                <div class="panel-label">PROJECT META</div>
+                
+                <div class="meta-row"><span class="meta-key">ROLE</span><span class="meta-val">Product Designer</span></div>
+                <div class="meta-row"><span class="meta-key">INDUSTRY</span><span class="meta-val">Consumer Audio</span></div>
+                <div class="meta-row"><span class="meta-key">PLATFORM</span><span class="meta-val">Mobile App</span></div>
+                <div class="meta-row"><span class="meta-key">DURATION</span><span class="meta-val">14 Weeks</span></div>
+                <div class="meta-row"><span class="meta-key">YEAR</span><span class="meta-val">2024</span></div>
+            </div>
+
+            <!-- OVERVIEW PANEL (RIGHT) -->
+            <div id="overview-panel" class="glass-panel bottom-panel">
+                <div class="hud-corner tl"></div>
+                <div class="hud-corner tr"></div>
+                <div class="hud-corner bl"></div>
+                <div class="hud-corner br"></div>
+                
+                <div class="panel-label">OVERVIEW</div>
+                
+                <div class="overview-text">
+                    This is a structural placeholder for the project overview. The content here will eventually describe the core problem, the strategic approach, and the overarching narrative of the Noise Audio App project.
+                </div>
+                <div class="overview-text" style="margin-bottom: 0;">
+                    Layout validation phase. Typography, line-height, and container padding are being tested before final case study copywriting is injected. The card now functions as a concise, balanced summary module.
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // System Scaling
+    function scaleLayout() {
+        const layout = document.getElementById('portfolio-layout');
+        const baseFit = Math.min(window.innerWidth / 1440, window.innerHeight / 900);
+        const contentFit = Math.min(window.innerWidth / 1160, window.innerHeight / 730);
+        const scale = Math.min(baseFit * 1.25, contentFit);
+        layout.style.transform = `translate(-50%, calc(-50% + 35px)) scale(${scale})`;
+    }
+
+    window.addEventListener('resize', scaleLayout);
+    scaleLayout();
+
+    // Carousel Logic
+    let currentSlide = 0;
+    const totalSlides = 3;
+    let autoPlayInterval;
+    const carousel = document.querySelector('.hero-carousel');
+
+    function updateSlide() {
+        if (carousel) {
+            carousel.style.transform = `translateX(-${currentSlide * 100}%)`;
+        }
+    }
+
+    function nextSlide() {
+        currentSlide = (currentSlide + 1) % totalSlides;
+        updateSlide();
+        startAutoPlay();
+    }
+
+    function prevSlide() {
+        currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+        updateSlide();
+        startAutoPlay();
+    }
+
+    function startAutoPlay() {
+        stopAutoPlay();
+        autoPlayInterval = setInterval(() => {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            updateSlide();
+        }, 6000);
+    }
+
+    function stopAutoPlay() {
+        if (autoPlayInterval) clearInterval(autoPlayInterval);
+    }
+
+    window.addEventListener('load', async () => {
+        const bgVideo = document.getElementById('bg-video');
+        if (bgVideo) {
+            try {
+                bgVideo.muted = true;
+                await bgVideo.play();
+            } catch (e) {
+                console.log('Cinematic background playback failed:', e);
+            }
+        }
+        
+        startAutoPlay();
+    });
+</script>
+</body>
+</html>

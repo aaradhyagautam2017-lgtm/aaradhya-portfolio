@@ -1,0 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  /* FONT FAMILIES */
+  --font-primary: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  
+  /* Legacy mappings */
+  --font-heading: var(--font-mono);
+  --font-body: var(--font-primary);
+
+  /* SCALES (Mapped non-destructively to previous visuals) */
+  --type-hero: 52px;
+  --type-h1: 36px;
+  --type-h2: 28px;
+  --type-h3: 22px;
+  --type-body-lg: 18px;
+  --type-body: 16px;
+  --type-body-sm: 14px;
+  --type-meta: 12px;
+  --type-hud: 11px;
+  --type-micro: 10px;
+
+  /* WEIGHTS */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+
+  /* COLORS */
+  --text-primary: rgba(255, 255, 255, 0.95);
+  --text-secondary: rgba(255, 255, 255, 0.68);
+  --text-tertiary: rgba(255, 255, 255, 0.45);
+  --accent-cold-blue: rgba(147, 197, 253, 0.85);
+
+  /* SPACING */
+  --space-2: 2px;
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-40: 40px;
+  --space-56: 56px;
+}
+
+/* Original typography rendering rules */
+body {
+    font-family: var(--font-primary) !important;
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* ━━━━━━━━━━━━━━━━━━
+   TYPOGRAPHY UTILITIES
+   ━━━━━━━━━━━━━━━━━━ */
+
+/* INTER (PRIMARY UI FONT) */
+
+.text-title {
+    font-family: var(--font-primary) !important;
+    font-weight: 600 !important;
+    letter-spacing: -0.02em !important;
+    text-transform: none !important;
+}
+
+.text-body-primary {
+    font-family: var(--font-primary) !important;
+    font-weight: 400 !important;
+    line-height: 1.65 !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+}
+
+.text-body-secondary {
+    font-family: var(--font-primary) !important;
+    font-weight: 400 !important;
+    line-height: 1.6 !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+    opacity: 0.65 !important;
+}
+
+/* JETBRAINS MONO (HUD / SYSTEM FONT) */
+
+.text-hud {
+    font-family: var(--font-mono) !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+}
+
+.text-section-label {
+    font-family: var(--font-mono) !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+}

@@ -1,0 +1,361 @@
+// Portfolio screen state machine — G-01 through G-04
+(function () {
+
+  // ── 1. Wormhole observer (preserved) ───────────────────────────────────
+  var wrapper = document.getElementById('portfolio-wrapper');
+  var canvas  = document.querySelector('canvas.experience');
+
+  if (wrapper && canvas) {
+    function hidePhase1Text() {
+      var introText   = document.getElementById('intro-text');
+      var tunnelTexts = document.querySelectorAll('.tunnel-text');
+      if (introText) {
+        introText.style.opacity       = '0';
+        introText.style.visibility    = 'hidden';
+        introText.style.pointerEvents = 'none';
+      }
+      tunnelTexts.forEach(function (el) {
+        el.style.opacity       = '0';
+        el.style.visibility    = 'hidden';
+        el.style.pointerEvents = 'none';
+      });
+    }
+
+    if (canvas.style.display === 'none') {
+      hidePhase1Text();
+      wrapper.style.display = 'block';
+      initPortfolio();
+    } else {
+      new MutationObserver(function (mutations, obs) {
+        if (canvas.style.display === 'none') {
+          hidePhase1Text();
+          wrapper.style.display = 'block';
+          obs.disconnect();
+          initPortfolio();
+        }
+      }).observe(canvas, { attributes: true, attributeFilter: ['style'] });
+    }
+  }
+
+  // ── 2. Project data ────────────────────────────────────────────────────
+  var PROJECTS = [
+    {
+      id: 1,
+      title: 'Zomo',
+      tagline: "Rethinking India’s busiest food-order experience",
+      tint: 'rgba(120,80,200,0.40)',
+      meta: [
+        { label: 'YEAR',     value: '2025' },
+        { label: 'TYPE',     value: 'UX Research · Mobile App' },
+        { label: 'DURATION', value: '12-week project' },
+        { label: 'ROLE',     value: 'Lead UX Designer' },
+      ],
+      overview: "Zomo is a redesign of India’s most-used food delivery experience. The project involved deep field research with delivery partners and customers, a complete audit of the existing flow, and an end-to-end prototype of the checkout and order-tracking journey.",
+      behance: '#',
+    },
+    {
+      id: 2,
+      title: 'Artha',
+      tagline: "Simplifying personal finance for India’s new investors",
+      tint: 'rgba(40,120,160,0.40)',
+      meta: [
+        { label: 'YEAR',     value: '2024' },
+        { label: 'TYPE',     value: 'Fintech · Product Design' },
+        { label: 'DURATION', value: '8-week project' },
+        { label: 'ROLE',     value: 'Product Designer' },
+      ],
+      overview: "Artha is a personal finance app designed for first-time investors in India. The design system was built from scratch with a focus on clarity, trust, and progressive disclosure of complex financial concepts.",
+      behance: '#',
+    },
+    {
+      id: 3,
+      title: 'Noise Audio',
+      tagline: 'Audio app redesign — playful, haptic-first interactions',
+      tint: 'rgba(140,40,60,0.40)',
+      meta: [
+        { label: 'YEAR',     value: '2024' },
+        { label: 'TYPE',     value: 'Audio App · Redesign' },
+        { label: 'DURATION', value: '6-week project' },
+        { label: 'ROLE',     value: 'UX + Motion Designer' },
+      ],
+      overview: "A full redesign of the Noise companion app, with a focus on tactile feedback, spatial audio controls, and a radically simplified equaliser interface. Prototyped in Origami Studio.",
+      behance: '#',
+    },
+    {
+      id: 4,
+      title: 'Noise Watch OS',
+      tagline: 'WearOS design system for Noise smartwatches',
+      tint: 'rgba(40,120,80,0.40)',
+      meta: [
+        { label: 'YEAR',     value: '2022' },
+        { label: 'TYPE',     value: 'WearOS · Design System' },
+        { label: 'DURATION', value: 'Internship · 1 year' },
+        { label: 'ROLE',     value: 'Design Intern' },
+      ],
+      overview: "During my internship at Noise, I contributed to the WearOS design system — creating a token-based component library for the new smartwatch lineup, with a focus on glanceability and one-hand navigation.",
+      behance: '#',
+    },
+  ];
+
+  // ── 3. Chat keyword → reply map ────────────────────────────────────────
+  var CHAT_REPLIES = [
+    { kw: ['process','how','approach','method','workflow'],
+      reply: "My process is research-first — I spend a lot of time with users before touching Figma. Discovery → synthesis → ideation → prototype → test → iterate. I care a lot about the ‘why’ before the ‘what’." },
+    { kw: ['tool','figma','framer','stack','software','origami','cursor'],
+      reply: "Figma for design + prototyping, Framer for production-ready web prototypes, Origami for haptic/gesture-heavy flows, After Effects for motion, Cursor for front-end experiments. I prototype in code more than most designers." },
+    { kw: ['available','hire','freelance','job','opportunit','open','looking'],
+      reply: "Yes! Open to select freelance projects and full-time roles. Best reached at hello@aaradhya.in — or book a 30-min call at cal.com/aaradhya." },
+    { kw: ['contact','reach','email','call','book','meeting'],
+      reply: "Best way: hello@aaradhya.in. Also on Behance and LinkedIn. For a proper intro call, cal.com/aaradhya." },
+    { kw: ['resume','cv','download'],
+      reply: "Download my resume using the ‘View Resume ↗’ button in the left panel — opens as a PDF." },
+    { kw: ['zomo','food','delivery'],
+      reply: "Zomo was a 12-week UX research + design project rethinking India’s busiest food-order experience. Tap the hero card to read the full case study." },
+    { kw: ['artha','finance','fintech','invest'],
+      reply: "Artha is a personal finance app designed for India’s new investors — lots of progressive disclosure and trust-building UX patterns." },
+    { kw: ['noise','audio','watch','wear'],
+      reply: "I did two Noise projects: the Audio app redesign (haptic-first, Origami-prototyped) and the WearOS design system from my internship." },
+    { kw: ['education','study','college','nid','degree'],
+      reply: "B.Des in Communication Design from NID Ahmedabad (2018–2022). NID is where I fell in love with systems thinking." },
+    { kw: ['location','delhi','india','remote','relocat'],
+      reply: "Based in Delhi, India (GMT+5:30). Remote-first — I’ve collaborated with teams across 3 time zones." },
+    { kw: ['work','project','case','show'],
+      reply: "I have 4 case studies — Zomo, Artha, Noise Audio, and Noise Watch OS. Tap any project card to explore them." },
+  ];
+  var FALLBACK = "Hmm, I didn’t quite catch that — try asking about my process, tools, projects, or availability. Or reach me at hello@aaradhya.in!";
+
+  // ── 4. State ───────────────────────────────────────────────────────────
+  var state = { screen: 'home', project: 1 };
+
+  // ── 5. Screen transition ───────────────────────────────────────────────
+  function goTo(screenName, projectIdx) {
+    var prev = document.getElementById('screen-' + state.screen);
+    var next = document.getElementById('screen-' + screenName);
+    if (!next) return;
+
+    if (prev && prev !== next) {
+      prev.style.opacity       = '0';
+      prev.style.pointerEvents = 'none';
+    }
+
+    state.screen = screenName;
+    if (projectIdx !== undefined) state.project = projectIdx;
+
+    if (screenName === 'project') populateProject(state.project);
+
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        next.style.opacity       = '1';
+        next.style.pointerEvents = 'auto';
+      });
+    });
+  }
+
+  // ── 6. Populate G-02 ──────────────────────────────────────────────────
+  function populateProject(idx) {
+    var p = PROJECTS[idx - 1];
+    if (!p) return;
+
+    var counterEl = document.getElementById('g2-counter');
+    if (counterEl) counterEl.textContent = '0' + p.id + ' / 0' + PROJECTS.length;
+  }
+
+  // ── 7. Chat helpers ────────────────────────────────────────────────────
+  function getReply(text) {
+    var lower = text.toLowerCase();
+    for (var i = 0; i < CHAT_REPLIES.length; i++) {
+      var entry = CHAT_REPLIES[i];
+      for (var j = 0; j < entry.kw.length; j++) {
+        if (lower.indexOf(entry.kw[j]) !== -1) return entry.reply;
+      }
+    }
+    return FALLBACK;
+  }
+
+  function appendBubble(container, text, who) {
+    var b = document.createElement('div');
+    b.className = 'chat-bubble chat-bubble--' + who;
+    b.textContent = text;
+    container.appendChild(b);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function sendHomeChat(text) {
+    if (!text.trim()) return;
+    var msg = text.trim();
+    showChatOverlay();
+    setTimeout(function () {
+      var conv = document.getElementById('g3-conversation');
+      if (!conv) return;
+      appendBubble(conv, msg, 'user');
+      setTimeout(function () { appendBubble(conv, getReply(msg), 'bot'); }, 500);
+    }, 120);
+  }
+
+  function sendActiveChat(text) {
+    if (!text.trim()) return;
+    var conv = document.getElementById('chat-conversation');
+    if (!conv) return;
+    appendBubble(conv, text.trim(), 'user');
+    setTimeout(function () { appendBubble(conv, getReply(text), 'bot'); }, 500);
+  }
+
+  // ── 8. Event bindings ─────────────────────────────────────────────────
+  function bindEvents() {
+
+    // G-01 · project cards → G-02
+    document.querySelectorAll('.project-card[data-project]').forEach(function (card) {
+      card.addEventListener('click', function () {
+        goTo('project', parseInt(card.getAttribute('data-project'), 10));
+      });
+    });
+
+    // G-01 · About Me → G-04
+    var btnAbout = document.getElementById('btn-about');
+    if (btnAbout) btnAbout.addEventListener('click', function () { goTo('about'); });
+
+    // G-01 · home chips → G-03
+    document.querySelectorAll('#home-chips .chat-chip').forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        sendHomeChat(chip.getAttribute('data-prompt'));
+      });
+    });
+
+    // G-01 · home input → G-03
+    var homeInput = document.getElementById('home-input');
+    var homeSend  = document.getElementById('home-send');
+    if (homeInput) {
+      homeInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { sendHomeChat(homeInput.value); homeInput.value = ''; }
+      });
+      homeInput.addEventListener('focus', function () { showChatOverlay(); });
+    }
+    if (homeSend) {
+      homeSend.addEventListener('click', function () {
+        var v = homeInput ? homeInput.value : '';
+        sendHomeChat(v);
+        if (homeInput) homeInput.value = '';
+      });
+    }
+
+    var chatInput = document.getElementById('chat-input');
+    var chatSend  = document.getElementById('chat-send');
+    if (chatInput) {
+      chatInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { sendHomeChat(chatInput.value); chatInput.value = ''; }
+      });
+    }
+    if (chatSend) {
+      chatSend.addEventListener('click', function() { sendHomeChat(chatInput.value); chatInput.value = ''; });
+    }
+
+    // G-02 · back / prev / next
+    var projBack = document.getElementById('project-back');
+    if (projBack) projBack.addEventListener('click', function () { goTo('home'); });
+
+    var projPrev = document.getElementById('project-prev');
+    if (projPrev) projPrev.addEventListener('click', function () {
+      var n = ((state.project - 2 + PROJECTS.length) % PROJECTS.length) + 1;
+      goTo('project', n);
+    });
+
+    var projNext = document.getElementById('project-next');
+    if (projNext) projNext.addEventListener('click', function () {
+      var n = (state.project % PROJECTS.length) + 1;
+      goTo('project', n);
+    });
+
+    // G-03 · back / close
+    var chatBackLink = document.getElementById('chat-back-link');
+    var chatClose    = document.getElementById('chat-close');
+    if (chatBackLink) chatBackLink.addEventListener('click', function () { hideChatOverlay(); });
+    if (chatClose)    chatClose.addEventListener('click',    function () { hideChatOverlay(); });
+
+    // G-03 · suggestion chips
+    document.querySelectorAll('#chat-suggestions .chat-chip').forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        sendActiveChat(chip.getAttribute('data-prompt'));
+      });
+    });
+
+    // G-03 · active input
+    var activeInput = document.getElementById('chat-active-input');
+    var activeSend  = document.getElementById('chat-active-send');
+    if (activeInput) {
+      activeInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { sendActiveChat(activeInput.value); activeInput.value = ''; }
+      });
+    }
+    if (activeSend) {
+      activeSend.addEventListener('click', function () {
+        var v = activeInput ? activeInput.value : '';
+        sendActiveChat(v);
+        if (activeInput) activeInput.value = '';
+      });
+    }
+
+    // G-04 · back / close
+    var aboutBack  = document.getElementById('about-back');
+    var aboutClose = document.getElementById('about-close');
+    if (aboutBack)  aboutBack.addEventListener('click',  function () { goTo('home'); });
+    if (aboutClose) aboutClose.addEventListener('click', function () { goTo('home'); });
+
+    // Esc key → home
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && state.screen !== 'home') goTo('home');
+    });
+  }
+
+  // ── 10. Viewport scaling ──────────────────────────────────────────────
+  function scaleLayout() {
+    var el = document.getElementById('portfolio-layout');
+    if (!el) return;
+    var baseFit = Math.min(window.innerWidth / 1440, window.innerHeight / 900);
+    var contentFit = Math.min(window.innerWidth / 1160, window.innerHeight / 730);
+    var s = Math.min(baseFit * 1.25, contentFit);
+    el.style.transform = 'translate(-50%, calc(-50% + 35px)) scale(' + s + ')';
+  }
+
+  function showChatOverlay() {
+    var g3 = document.getElementById('g3-container');
+    var cards = ['hero-card', 'support-1', 'support-2', 'support-3'];
+    cards.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.classList.add('g3-hidden');
+    });
+    if (g3) {
+      g3.style.opacity = '1';
+      g3.style.pointerEvents = 'auto';
+    }
+    var chatInput = document.getElementById('chat-input');
+    if (chatInput) setTimeout(function() { chatInput.focus(); }, 50);
+  }
+
+  function hideChatOverlay() {
+    var g3 = document.getElementById('g3-container');
+    var cards = ['hero-card', 'support-1', 'support-2', 'support-3'];
+    cards.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.classList.remove('g3-hidden');
+    });
+    if (g3) {
+      g3.style.opacity = '0';
+      g3.style.pointerEvents = 'none';
+    }
+  }
+
+  // ── 9. Bootstrap ───────────────────────────────────────────────────────
+  function initPortfolio() {
+    document.querySelectorAll('.portfolio-screen').forEach(function (s) {
+      s.style.display       = 'flex';
+      s.style.opacity       = '0';
+      s.style.pointerEvents = 'none';
+      s.style.transition    = 'opacity 0.30s ease';
+    });
+    scaleLayout();
+    window.addEventListener('resize', scaleLayout);
+    bindEvents();
+    goTo('home');
+  }
+
+}());

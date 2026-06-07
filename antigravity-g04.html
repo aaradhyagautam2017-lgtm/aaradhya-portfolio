@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deterministic Cinematic Portfolio - G4 Scaffold</title>
+<link rel="stylesheet" href="typography.css">
+<style>
+    /* ━━━━━━━━━━━━━━━━━━
+       CORE RENDERING
+       ━━━━━━━━━━━━━━━━━━ */
+    html, body {
+        margin: 0;
+        padding: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: transparent;
+    }
+    
+    body {
+        background: transparent;
+        overflow: hidden;
+    }
+
+    #bg-video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        object-fit: cover;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    #portfolio-layout {
+        position: absolute;
+        width: 1440px;
+        height: 900px;
+        top: 50%;
+        left: 50%;
+        transform-origin: 720px 415px;
+        transform: translate(-720px, -415px) scale(1.25);
+        pointer-events: auto;
+    }
+
+    #portfolio-layout::before {
+        content: '';
+        position: absolute;
+        inset: -150px;
+        background: radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.035) 0%, rgba(59, 130, 246, 0.02) 50%, transparent 80%);
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    @keyframes ambientLuminance {
+        0% { opacity: 0.3; }
+        100% { opacity: 0.6; }
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━
+       GLASS SYSTEM & DEPTH
+       ━━━━━━━━━━━━━━━━━━ */
+    .glass-panel {
+        position: relative;
+        background: linear-gradient(
+          135deg,
+          rgba(20, 15, 30, 0.45) 0%,
+          rgba(10, 5, 15, 0.35) 50%,
+          rgba(0, 0, 5, 0.25) 100%
+        ) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-shadow:
+          inset 0 1px 1px rgba(255, 255, 255, 0.20),
+          inset 0 0 12px rgba(139, 92, 246, 0.10),
+          0 12px 48px rgba(0,0,0,0.45) !important;
+        opacity: 1 !important;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    .glass-panel::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: 
+            radial-gradient(circle at 50% 84px, rgba(139, 92, 246, 0.04) 0%, transparent 60%),
+            radial-gradient(circle at 50% 490px, rgba(139, 92, 246, 0.02) 0%, transparent 50%) !important;
+        pointer-events: none;
+        opacity: 0.4 !important;
+        animation: ambientLuminance 24s ease-in-out infinite alternate;
+        z-index: 0;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━
+       G4 ARCHITECTURE
+       ━━━━━━━━━━━━━━━━━━ */
+    #g4-container {
+        position: absolute;
+        width: 1060px;
+        height: 630px;
+        top: 100px;
+        left: 190px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    #utility-bar {
+        width: 100%;
+        height: 56px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 20px;
+        padding: 0 24px;
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.85);
+        position: relative;
+    }
+
+    #g4-content-grid {
+        display: flex;
+        gap: 20px;
+        width: 100%;
+        flex: 1;
+    }
+
+    .g4-column {
+        flex: 1;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.45);
+    }
+
+    /* G4 Internal Content Styling */
+    .col-content {
+        position: absolute;
+        inset: 0;
+        color: rgba(255, 255, 255, 0.85);
+        padding: 20px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* HUD Framing System inside cards */
+    .hud-frame-layer {
+        position: absolute;
+        inset: 12px;
+        pointer-events: none;
+        z-index: 5;
+    }
+    .hud-bracket {
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.40);
+    }
+    .hud-bracket.tl { top: 0; left: 0; border-right: none; border-bottom: none; }
+    .hud-bracket.tr { top: 0; right: 0; border-left: none; border-bottom: none; opacity: 0.7; }
+    .hud-bracket.bl { bottom: 0; left: 0; border-right: none; border-top: none; opacity: 0.7; }
+    .hud-bracket.br { bottom: 0; right: 0; border-left: none; border-top: none; }
+    
+    .hud-tick {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.40);
+    }
+    .hud-tick.top { top: 0; left: 50%; width: 1px; height: 3px; transform: translateX(-50%); }
+    .hud-tick.bottom { bottom: 0; left: 50%; width: 1px; height: 3px; transform: translateX(-50%); }
+
+    /* Section Headers */
+    .section-header {
+        font-size: 9px;
+        color: rgba(255, 255, 255, 0.45);
+    }
+
+    /* Telemetry Divider */
+    .divider-system {
+        position: relative;
+        width: 100%;
+        height: 4px;
+        margin: 16px 0;
+        display: flex;
+        align-items: center;
+    }
+    .divider-system::before, .divider-system::after {
+        content: '';
+        position: absolute;
+        width: 1px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.35);
+    }
+    .divider-system::before { left: 0; }
+    .divider-system::after { right: 0; }
+    .divider-line {
+        width: 100%;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    /* Portrait Sub-system */
+    .portrait-frame {
+        position: relative;
+        width: 100%;
+        height: 320px;
+        margin-bottom: 20px;
+    }
+    .portrait-glass {
+        position: absolute;
+        inset: 0;
+        border-radius: 8px;
+        background: rgba(20, 15, 30, 0.25);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        z-index: 1;
+    }
+    .portrait-dot-matrix {
+        position: absolute;
+        inset: 0;
+        border-radius: 8px;
+        background-image: radial-gradient(rgba(215, 225, 255, 0.08) 1px, transparent 1px);
+        background-size: 10px 10px;
+        background-position: center;
+        z-index: 2;
+        pointer-events: none;
+    }
+    .portrait-image-container {
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        border-radius: 8px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .portrait-hud {
+        position: absolute;
+        inset: 0;
+        z-index: 4;
+        pointer-events: none;
+        border-radius: 8px;
+    }
+    .portrait-meta-left {
+        position: absolute;
+        bottom: 16px;
+        left: 16px;
+        font-size: 8px;
+        color: rgba(255, 255, 255, 0.70);
+    }
+    .portrait-meta-right {
+        position: absolute;
+        bottom: 16px;
+        right: 16px;
+        text-align: right;
+        font-size: 8px;
+        color: rgba(255, 255, 255, 0.80);
+    }
+
+    /* CTA Buttons (Inherited from G1) */
+    .glass-btn {
+        position: relative;
+        height: 32px;
+        border-radius: 4px;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        background: rgba(255, 255, 255, 0.01) !important;
+        cursor: pointer;
+        font-size: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 14px;
+        transition: all 250ms cubic-bezier(0.16, 1, 0.3, 1);
+        color: rgba(255, 255, 255, 0.45) !important;
+        box-shadow: none;
+        box-sizing: border-box;
+    }
+    .glass-btn:hover {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: rgba(255, 255, 255, 0.20) !important;
+        color: rgba(255, 255, 255, 0.80) !important;
+    }
+    .glass-btn:hover .btn-corner {
+        border-color: rgba(255, 255, 255, 0.35) !important;
+    }
+    .glass-btn .btn-arrow {
+        color: rgba(255, 255, 255, 0.45) !important;
+        font-size: 9.5px;
+        font-weight: 500;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 250ms ease;
+    }
+    .glass-btn:hover .btn-arrow {
+        color: rgba(255, 255, 255, 0.65) !important;
+    }
+    .btn-corner {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        pointer-events: none;
+        z-index: 2;
+        transition: border-color 250ms ease;
+    }
+    .btn-corner.tl { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+    .btn-corner.tr { top: -1px; right: -1px; border-left: none; border-bottom: none; }
+    .btn-corner.bl { bottom: -1px; left: -1px; border-right: none; border-top: none; }
+    .btn-corner.br { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+
+    /* Experience Timeline */
+    .timeline-item {
+        position: relative;
+        padding-left: 20px;
+        margin-bottom: 12px;
+    }
+    .timeline-item:last-child {
+        margin-bottom: 0;
+    }
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: 2px;
+        top: 6px;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        background: transparent;
+    }
+    .timeline-item:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        left: 4.5px;
+        top: 16px;
+        bottom: -10px;
+        width: 1px;
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Sharp Cinematic Tags */
+    .soft-pill {
+        width: 32px;
+        height: 32px;
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.75);
+    }
+    .stack-chip {
+        height: 22px;
+        padding: 0 8px;
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        font-size: 9.5px;
+        color: rgba(255, 255, 255, 0.65);
+    }
+
+</style>
+</head>
+<body>
+
+<video id="bg-video" src="./assets/background.mp4" autoplay muted loop playsinline></video>
+
+<div id="portfolio-layout">
+    <div id="g4-container">
+        <!-- Utility Bar -->
+        <div id="utility-bar" class="glass-panel text-hud">
+            <div class="text-title" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; font-size: 14px; color: rgba(255,255,255,0.8); font-weight: 500; line-height: 1; cursor: pointer; position: relative; z-index: 2;">
+                ←
+            </div>
+            <span style="position: absolute; left: 50%; transform: translateX(-50%); text-align: center; pointer-events: none;">ABOUT · AARADHYA GAUTAM</span>
+        </div>
+        
+        <!-- Content Grid -->
+        <div id="g4-content-grid">
+            
+            <!-- Identity Column -->
+            <div class="g4-column glass-panel text-hud">
+                <div class="col-content text-body-primary">
+                    <div class="hud-frame-layer">
+                        <div class="hud-bracket tl"></div><div class="hud-bracket tr"></div>
+                        <div class="hud-bracket bl"></div><div class="hud-bracket br"></div>
+                        <div class="hud-tick top"></div><div class="hud-tick bottom"></div>
+                    </div>
+                    
+                    <div class="portrait-frame">
+                        <div class="portrait-glass"></div>
+                        <div class="portrait-dot-matrix"></div>
+                        <div class="portrait-image-container">
+                            <!-- Transparent PNG portrait gets inserted here by Claude -->
+                        </div>
+                        <div class="portrait-hud">
+                            <div class="portrait-meta-left text-body-secondary">| ID.NOD3_AA7</div>
+                            <div class="portrait-meta-right text-body-secondary">PORTRAIT // 4:5<br>VISUAL IDENTITY NODE</div>
+                        </div>
+                    </div>
+                    
+                    <div style="padding: 0 4px;">
+                        <div class="text-title" style="font-size: 26px; color: rgba(255,255,255,0.95);">Aaradhya Gautam</div>
+                        <div class="text-body-secondary" style="font-size: 13px; margin-top: 6px;">UI/UX Designer • Delhi, India</div>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 24px;">
+                            <button class="glass-btn text-hud">
+                                <div class="btn-corner tl"></div><div class="btn-corner tr"></div>
+                                <div class="btn-corner bl"></div><div class="btn-corner br"></div>
+                                RESUME <span class="btn-arrow">&gt;</span>
+                            </button>
+                            <button class="glass-btn text-hud">
+                                <div class="btn-corner tl"></div><div class="btn-corner tr"></div>
+                                <div class="btn-corner bl"></div><div class="btn-corner br"></div>
+                                EMAIL <span class="btn-arrow">&gt;</span>
+                            </button>
+                            <button class="glass-btn text-hud">
+                                <div class="btn-corner tl"></div><div class="btn-corner tr"></div>
+                                <div class="btn-corner bl"></div><div class="btn-corner br"></div>
+                                CALL <span class="btn-arrow">&gt;</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Biography Column -->
+            <div class="g4-column glass-panel text-hud">
+                <div class="col-content text-body-primary">
+                    <div class="hud-frame-layer">
+                        <div class="hud-bracket tl"></div><div class="hud-bracket tr"></div>
+                        <div class="hud-bracket bl"></div><div class="hud-bracket br"></div>
+                        <div class="hud-tick top"></div><div class="hud-tick bottom"></div>
+                    </div>
+                    
+                    <div style="padding: 4px; display: flex; flex-direction: column; height: 100%;">
+                        <div class="section-header text-section-label">BIOGRAPHY</div>
+                        
+                        <div class="text-body-primary" style="font-size: 12.5px; color: rgba(255,255,255,0.7); margin-top: 12px; line-height: 1.6;">
+                            I'm a designer obsessed with the seam where logic meets feeling. I spend half my time digging through user research and half daydreaming about how it could look.
+                        </div>
+                        <div class="text-body-primary" style="font-size: 12.5px; color: rgba(255,255,255,0.7); margin-top: 10px; line-height: 1.6;">
+                            Currently designing AI-native interfaces — the kind that listen before they speak. Previously at Zomato and Razorpay; before that, NID Ahmedabad.
+                        </div>
+                        
+                        <div style="margin-top: auto;">
+                            <div class="divider-system"><div class="divider-line"></div></div>
+                            
+                            <div class="section-header text-section-label">FIND ME</div>
+                            <div style="display: flex; gap: 8px; margin-top: 12px;">
+                                <div class="soft-pill text-body-secondary">Be</div>
+                                <div class="soft-pill text-body-secondary">Dr</div>
+                                <div class="soft-pill text-body-secondary">in</div>
+                                <div class="soft-pill text-body-secondary">X</div>
+                                <div class="soft-pill text-body-secondary">Gh</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Experience Column -->
+            <div class="g4-column glass-panel text-hud">
+                <div class="col-content text-body-primary">
+                    <div class="hud-frame-layer">
+                        <div class="hud-bracket tl"></div><div class="hud-bracket tr"></div>
+                        <div class="hud-bracket bl"></div><div class="hud-bracket br"></div>
+                        <div class="hud-tick top"></div><div class="hud-tick bottom"></div>
+                    </div>
+                    
+                    <div style="padding: 4px;">
+                        <div class="section-header text-section-label">EXPERIENCE</div>
+                        
+                        <div style="margin-top: 16px;">
+                            <div class="timeline-item">
+                                <div class="text-hud" style="font-size: 8.5px; color: rgba(255,255,255,0.35);">2025 — NOW</div>
+                                <div class="text-title" style="font-size: 12px; color: rgba(255,255,255,0.85); margin-top: 2px;">Lead Designer · Zomato</div>
+                                <div class="text-body-secondary" style="font-size: 10.5px; color: rgba(255,255,255,0.45); margin-top: 1px;">Order-flow · checkout team</div>
+                            </div>
+                            
+                            <div class="timeline-item">
+                                <div class="text-hud" style="font-size: 8.5px; color: rgba(255,255,255,0.35);">2023 — 2025</div>
+                                <div class="text-title" style="font-size: 12px; color: rgba(255,255,255,0.85); margin-top: 2px;">Product Designer · Razorpay</div>
+                                <div class="text-body-secondary" style="font-size: 10.5px; color: rgba(255,255,255,0.45); margin-top: 1px;">Merchant dashboard</div>
+                            </div>
+                            
+                            <div class="timeline-item">
+                                <div class="text-hud" style="font-size: 8.5px; color: rgba(255,255,255,0.35);">2022 — 2023</div>
+                                <div class="text-title" style="font-size: 12px; color: rgba(255,255,255,0.85); margin-top: 2px;">Freelance</div>
+                                <div class="text-body-secondary" style="font-size: 10.5px; color: rgba(255,255,255,0.45); margin-top: 1px;">Brand + product for 6 clients</div>
+                            </div>
+                            
+                            <div class="timeline-item">
+                                <div class="text-hud" style="font-size: 8.5px; color: rgba(255,255,255,0.35);">2021 — 2022</div>
+                                <div class="text-title" style="font-size: 12px; color: rgba(255,255,255,0.85); margin-top: 2px;">Design Intern · Noise</div>
+                                <div class="text-body-secondary" style="font-size: 10.5px; color: rgba(255,255,255,0.45); margin-top: 1px;">WearOS design system</div>
+                            </div>
+                        </div>
+                        
+                        <div class="divider-system" style="margin: 12px 0;"><div class="divider-line"></div></div>
+                        
+                        <div class="section-header text-section-label">EDUCATION</div>
+                        <div style="margin-top: 10px;">
+                            <div class="text-title" style="font-size: 12px; color: rgba(255,255,255,0.85);">B.Des — Communication Design</div>
+                            <div class="text-body-secondary" style="font-size: 10.5px; color: rgba(255,255,255,0.45); margin-top: 1px;">NID Ahmedabad · 2018–2022</div>
+                        </div>
+                        
+                        <div class="divider-system" style="margin: 12px 0;"><div class="divider-line"></div></div>
+                        
+                        <div class="section-header text-section-label">STACK</div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px;">
+                            <div class="stack-chip text-body-secondary">Figma</div>
+                            <div class="stack-chip text-body-secondary">Framer</div>
+                            <div class="stack-chip text-body-secondary">Cursor</div>
+                            <div class="stack-chip text-body-secondary">Origami</div>
+                            <div class="stack-chip text-body-secondary">Webflow</div>
+                            <div class="stack-chip text-body-secondary">After Effects</div>
+                            <div class="stack-chip text-body-secondary">Notion</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function scaleLayout() {
+        const layout = document.getElementById('portfolio-layout');
+        
+        // 1. Calculate the standard viewport-fit anchoring 
+        const baseFit = Math.min(window.innerWidth / 1440, window.innerHeight / 900);
+        
+        // 2. Calculate the safe bounds of the ACTUAL internal cards (Cards span roughly 1060x630. We add safe cinematic padding to 1160x730).
+        const contentFit = Math.min(window.innerWidth / 1160, window.innerHeight / 730);
+        
+        // 3. Hybrid Cinematic Scale: 
+        // Boost the base scale to increase occupancy and screen dominance on all monitors,
+        // BUT strictly clamp it to 'contentFit' so it never clips the actual composition.
+        const scale = Math.min(baseFit * 1.25, contentFit);
+        
+        // Apply dynamic scale, perfectly locking the visual center
+        layout.style.transform = `translate(-50%, calc(-50% + 35px)) scale(${scale})`;
+    }
+
+    window.addEventListener('resize', scaleLayout);
+    scaleLayout();
+
+    window.addEventListener('load', async () => {
+        const bgVideo = document.getElementById('bg-video');
+        if (bgVideo) {
+            try {
+                bgVideo.muted = true;
+                await bgVideo.play();
+            } catch (e) {
+                console.log('Cinematic background playback failed:', e);
+            }
+        }
+    });
+</script>
+</body>
+</html>
