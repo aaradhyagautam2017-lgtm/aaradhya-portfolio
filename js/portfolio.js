@@ -205,8 +205,34 @@
     var p = PROJECTS[idx - 1];
     if (!p) return;
 
+    // Counter
     var counterEl = document.getElementById('g2-counter');
     if (counterEl) counterEl.textContent = '0' + p.id + ' / 0' + PROJECTS.length;
+
+    // Meta rows — clear and rebuild from data
+    var metaPanel = document.getElementById('meta-panel');
+    if (metaPanel) {
+      var oldRows = metaPanel.querySelectorAll('.meta-row');
+      oldRows.forEach(function (row) { row.parentNode.removeChild(row); });
+      p.meta.forEach(function (item) {
+        var row = document.createElement('div');
+        row.className = 'meta-row';
+        row.innerHTML = '<span class="meta-key">' + item.label + '</span><span class="meta-val">' + item.value + '</span>';
+        metaPanel.appendChild(row);
+      });
+    }
+
+    // Overview text
+    var overviewEl = document.querySelector('#overview-panel .overview-text');
+    if (overviewEl) overviewEl.textContent = p.overview || '';
+
+    // Behance link
+    var behanceEl = document.querySelector('#overview-panel .g2-cta-btn');
+    if (behanceEl) behanceEl.href = p.behance || '#';
+
+    // NDA wrapper — show only if project is under NDA
+    var ndaWrapper = document.querySelector('#overview-panel .g2-nda-wrapper');
+    if (ndaWrapper) ndaWrapper.style.display = p.nda ? 'block' : 'none';
   }
 
   // ── 7. Chat helpers ────────────────────────────────────────────────────
