@@ -136,13 +136,16 @@
     var base = 'https://svn8kxqj.apicdn.sanity.io/v2021-10-21/data/query/production?query=';
     var projectQuery = encodeURIComponent('*[_type == "project"] | order(order asc) {title, order, tagline, role, industry, platform, duration, year, overview, behance, nda}');
     var chatQuery = encodeURIComponent('*[_type == "chatbotResponse"] {keyword, response}');
+    var profileQuery = encodeURIComponent('*[_type == "profile"][0] {statusText, progressValue}');
     try {
       Promise.all([
         fetch(base + projectQuery).then(function (r) { return r.json(); }),
         fetch(base + chatQuery).then(function (r) { return r.json(); }),
+        fetch(base + profileQuery).then(function (r) { return r.json(); }),
       ]).then(function (results) {
         var sanityProjects = results[0].result;
         var sanityChat     = results[1].result;
+        var sanityProfile  = results[2].result;
         if (sanityProjects && sanityProjects.length) {
           PROJECTS = sanityProjects.map(function (p) {
             var type = [p.industry, p.platform].filter(Boolean).join(' / ');
@@ -167,6 +170,14 @@
           CHAT_REPLIES = sanityChat.map(function (c) {
             return { kw: [c.keyword], reply: c.response };
           });
+        }
+        if (sanityProfile) {
+          var statusEl = document.getElementById('profile-status-text');
+          var valEl    = document.getElementById('profile-progress-val');
+          var fillEl   = document.getElementById('profile-progress-fill');
+          if (statusEl && sanityProfile.statusText)   statusEl.textContent = sanityProfile.statusText;
+          if (valEl    && sanityProfile.progressValue != null) valEl.textContent  = sanityProfile.progressValue + '%';
+          if (fillEl   && sanityProfile.progressValue != null) fillEl.style.width = sanityProfile.progressValue + '%';
         }
       }).catch(function () {});
     } catch (e) {}
