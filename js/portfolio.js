@@ -124,6 +124,55 @@
   ];
   var FALLBACK = "Hmm, I didn’t quite catch that — try asking about my process, tools, projects, or availability. Or reach me at hello@aaradhya.in!";
 
+  // -- 3b. Sanity live-data loader
+  var TINTS = [
+    'rgba(120,80,200,0.40)',
+    'rgba(40,120,160,0.40)',
+    'rgba(140,40,60,0.40)',
+    'rgba(40,120,80,0.40)',
+  ];
+
+  function fetchSanityData() {
+    var base = 'https://svn8kxqj.apicdn.sanity.io/v2021-10-21/data/query/production?query=';
+    var projectQuery = encodeURIComponent('*[_type == "project"] | order(order asc) {title, order, tagline, role, industry, platform, duration, year, overview, behance, nda}');
+    var chatQuery = encodeURIComponent('*[_type == "chatbotResponse"] {keyword, response}');
+    try {
+      Promise.all([
+        fetch(base + projectQuery).then(function (r) { return r.json(); }),
+        fetch(base + chatQuery).then(function (r) { return r.json(); }),
+      ]).then(function (results) {
+        var sanityProjects = results[0].result;
+        var sanityChat     = results[1].result;
+        if (sanityProjects && sanityProjects.length) {
+          PROJECTS = sanityProjects.map(function (p) {
+            var type = [p.industry, p.platform].filter(Boolean).join(' / ');
+            var meta = [];
+            if (p.year)     meta.push({ label: 'YEAR',     value: p.year });
+            if (type)       meta.push({ label: 'TYPE',     value: type });
+            if (p.duration) meta.push({ label: 'DURATION', value: p.duration });
+            if (p.role)     meta.push({ label: 'ROLE',     value: p.role });
+            return {
+              id:       p.order,
+              title:    p.title,
+              tagline:  p.tagline  || '',
+              tint:     TINTS[(p.order - 1) % TINTS.length],
+              meta:     meta,
+              overview: p.overview || '',
+              behance:  p.behance  || '#',
+              nda:      p.nda      || false,
+            };
+          });
+        }
+        if (sanityChat && sanityChat.length) {
+          CHAT_REPLIES = sanityChat.map(function (c) {
+            return { kw: [c.keyword], reply: c.response };
+          });
+        }
+      }).catch(function () {});
+    } catch (e) {}
+  }
+
+
   // ── 4. State ───────────────────────────────────────────────────────────
   var state = { screen: 'home', project: 1 };
 
@@ -346,6 +395,7 @@
 
   // ── 9. Bootstrap ───────────────────────────────────────────────────────
   function initPortfolio() {
+    fetchSanityData();
     document.querySelectorAll('.portfolio-screen').forEach(function (s) {
       s.style.display       = 'flex';
       s.style.opacity       = '0';
