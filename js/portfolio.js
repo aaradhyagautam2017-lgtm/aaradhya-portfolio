@@ -134,7 +134,7 @@
 
   function fetchSanityData() {
     var base = 'https://svn8kxqj.apicdn.sanity.io/v2021-10-21/data/query/production?query=';
-    var projectQuery = encodeURIComponent('*[_type == "project"] | order(order asc) {title, order, tagline, role, industry, platform, duration, year, overview, behance, nda}');
+    var projectQuery = encodeURIComponent('*[_type == "project"] | order(order asc) {title, order, tagline, role, industry, platform, duration, year, overview, behance, nda, "images": images[].asset->url}');
     var chatQuery = encodeURIComponent('*[_type == "chatbotResponse"] {keyword, response}');
     var profileQuery = encodeURIComponent('*[_type == "profile"][0] {statusText, progressValue}');
     try {
@@ -163,6 +163,7 @@
               overview: p.overview || '',
               behance:  p.behance  || '#',
               nda:      p.nda      || false,
+              images:   p.images   || [],
             };
           });
         }
@@ -212,6 +213,8 @@
   }
 
   // ── 6. Populate G-02 ──────────────────────────────────────────────────
+  var carouselIdx = 0;
+
   function populateProject(idx) {
     var p = PROJECTS[idx - 1];
     if (!p) return;
@@ -244,6 +247,42 @@
     // NDA wrapper — show only if project is under NDA
     var ndaWrapper = document.querySelector('#overview-panel .g2-nda-wrapper');
     if (ndaWrapper) ndaWrapper.style.display = p.nda ? 'block' : 'none';
+
+    // Carousel images
+    carouselIdx = 0;
+    var carousel = document.querySelector('.hero-carousel');
+    if (carousel) {
+      carousel.innerHTML = '';
+      var imgs = (p.images && p.images.length) ? p.images : [null];
+      imgs.forEach(function (url, i) {
+        var slide = document.createElement('div');
+        slide.className = 'carousel-slide';
+        if (url) {
+          var img = document.createElement('img');
+          img.src = url;
+          img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
+          slide.appendChild(img);
+        }
+        slide.style.display = (i === 0) ? 'block' : 'none';
+        carousel.appendChild(slide);
+      });
+    }
+  }
+
+  function prevSlide() {
+    var slides = document.querySelectorAll('.hero-carousel .carousel-slide');
+    if (!slides.length) return;
+    slides[carouselIdx].style.display = 'none';
+    carouselIdx = (carouselIdx - 1 + slides.length) % slides.length;
+    slides[carouselIdx].style.display = 'block';
+  }
+
+  function nextSlide() {
+    var slides = document.querySelectorAll('.hero-carousel .carousel-slide');
+    if (!slides.length) return;
+    slides[carouselIdx].style.display = 'none';
+    carouselIdx = (carouselIdx + 1) % slides.length;
+    slides[carouselIdx].style.display = 'block';
   }
 
   // ── 7. Chat helpers ────────────────────────────────────────────────────
@@ -442,6 +481,8 @@
     scaleLayout();
     window.addEventListener('resize', scaleLayout);
     bindEvents();
+    window.prevSlide = prevSlide;
+    window.nextSlide = nextSlide;
     goTo('home');
   }
 
