@@ -1403,7 +1403,7 @@ body{
     position: absolute; left: 20px; width: 215px; height: 1px;
     background: rgba(255, 255, 255, 0.07);
 }
-.divider-2 { top: 336px; }
+.divider-2 { top: 325px; }
 .divider-3 { top: 420px; }
 .divider-4 { top: 550px; }
 
@@ -1421,9 +1421,9 @@ body{
     font-weight: 600; text-transform: uppercase; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 .profile-currently-text {
-    position: absolute; left: 20px; top: 371px;
-    font-size: 13px; color: rgba(255, 255, 255, 0.85); font-weight: 400;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    position: absolute; left: 20px; top: 371px; width: 215px;
+    font-size: var(--type-meta); color: rgba(255, 255, 255, 0.85); font-weight: 400;
+    line-height: 1.5; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .profile-progress-container { position: absolute; left: 20px; top: 395px; width: 215px; }
