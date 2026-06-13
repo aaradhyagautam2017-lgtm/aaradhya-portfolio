@@ -1403,31 +1403,31 @@ body{
     position: absolute; left: 20px; width: 215px; height: 1px;
     background: rgba(255, 255, 255, 0.07);
 }
-.divider-2 { top: 325px; }
-.divider-3 { top: 452px; }
-.divider-4 { top: 582px; }
+.divider-2 { top: 355px; }
+.divider-3 { top: 482px; }
+.divider-4 { top: 612px; }
 
 #screen-home .profile-bio {
-    position: absolute; left: 20px; top: 242px; width: 215px;
+    position: absolute; left: 20px; top: 224px; width: 215px;
     font-size: 12px; line-height: 1.6; color: rgba(255, 255, 255, 0.65);
     font-weight: 400; letter-spacing: 0.01em;
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
 .profile-currently-label {
-    position: absolute; left: 20px; top: 353px;
+    position: absolute; left: 20px; top: 383px;
     font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
     font-size: 10px; color: rgba(147, 197, 253, 0.8); letter-spacing: 0.1em;
     font-weight: 600; text-transform: uppercase; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 .profile-currently-text {
-    position: absolute; left: 20px; top: 371px; width: 215px;
+    position: absolute; left: 20px; top: 401px; width: 215px;
     font-size: var(--type-meta); color: rgba(255, 255, 255, 0.72); font-weight: 400;
     line-height: 1.5; height: 36px; overflow: hidden;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-.profile-progress-container { position: absolute; left: 20px; top: 422px; width: 215px; }
+.profile-progress-container { position: absolute; left: 20px; top: 452px; width: 215px; }
 .profile-progress-val {
     position: absolute; right: 0; top: -14px;
     font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
@@ -1475,7 +1475,7 @@ body{
 .profile-btn:hover .btn-corner { border-color: rgba(255, 255, 255, 0.35) !important; }
 
 .btn-about {
-    top: 468px;
+    top: 498px;
     border: 1px solid rgba(147, 197, 253, 0.55) !important;
     background: linear-gradient(180deg, rgba(59, 130, 246, 0.16) 0%, rgba(37, 99, 235, 0.04) 100%) !important;
     box-shadow: inset 0 0 10px rgba(147, 197, 253, 0.25), 0 0 8px rgba(147, 197, 253, 0.1) !important;
@@ -1499,8 +1499,8 @@ body{
     text-shadow: 0 0 6px rgba(147, 197, 253, 0.95), 0 0 12px rgba(59, 130, 246, 0.8);
 }
 
-.btn-resume { top: 504px; }
-.btn-contact { top: 540px; }
+.btn-resume { top: 534px; }
+.btn-contact { top: 570px; }
 
 .btn-resume .btn-corner,
 .btn-contact .btn-corner       { border-color: rgba(255, 255, 255, 0.15) !important; }
@@ -2511,6 +2511,42 @@ body{
     border: 1px solid rgba(255, 255, 255, 0.1);
     background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
 }
+
+/* ── PROFILE FLOW — dynamic flex column ── */
+.profile-flow {
+  position: absolute;
+  top: 148px;
+  left: 20px;
+  right: 20px;
+  bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+#screen-home .profile-flow .profile-name,
+#screen-home .profile-flow .profile-location,
+#screen-home .profile-flow .profile-bio,
+#screen-home .profile-flow .profile-divider,
+#screen-home .profile-flow .profile-currently-label,
+#screen-home .profile-flow .profile-currently-text,
+#screen-home .profile-flow .profile-progress-container,
+#screen-home .profile-flow .profile-btn {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  width: 100%;
+}
+#screen-home .profile-flow .profile-name        { margin-bottom: 4px; }
+#screen-home .profile-flow .profile-location    { margin-bottom: 16px; }
+#screen-home .profile-flow .divider-1           { margin-bottom: 16px; }
+#screen-home .profile-flow .profile-bio         { margin-bottom: 16px; }
+#screen-home .profile-flow .divider-2           { margin-bottom: 14px; }
+#screen-home .profile-flow .profile-currently-label { width: auto; margin-bottom: 6px; }
+#screen-home .profile-flow .profile-currently-text  { margin-bottom: 12px; }
+#screen-home .profile-flow .profile-progress-container { margin-bottom: 14px; }
+#screen-home .profile-flow .divider-3           { margin-bottom: 12px; }
+#screen-home .profile-flow .profile-btn         { margin-bottom: 8px; flex-shrink: 0; }
+#screen-home .profile-flow .btn-contact         { margin-bottom: 0; }
+#screen-home .profile-flow .divider-4           { margin-top: auto; }
 
 /* ── PROFILE DIVIDER 1 ── */
 #screen-home .divider-1 { top: 200px; }
