@@ -1394,7 +1394,7 @@ body{
 }
 
 #screen-home .profile-location {
-    position: absolute; top: 194px; left: 20px; width: 215px; text-align: center;
+    position: absolute; top: 178px; left: 20px; width: 215px; text-align: center;
     font-size: 11px; color: rgba(255, 255, 255, 0.55); font-weight: 400;
     letter-spacing: 0.02em; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
@@ -1404,8 +1404,8 @@ body{
     background: rgba(255, 255, 255, 0.07);
 }
 .divider-2 { top: 325px; }
-.divider-3 { top: 436px; }
-.divider-4 { top: 550px; }
+.divider-3 { top: 452px; }
+.divider-4 { top: 582px; }
 
 #screen-home .profile-bio {
     position: absolute; left: 20px; top: 242px; width: 215px;
@@ -1417,17 +1417,17 @@ body{
 .profile-currently-label {
     position: absolute; left: 20px; top: 353px;
     font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-    font-size: 8px; color: rgba(147, 197, 253, 0.8); letter-spacing: 0.1em;
+    font-size: 10px; color: rgba(147, 197, 253, 0.8); letter-spacing: 0.1em;
     font-weight: 600; text-transform: uppercase; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 .profile-currently-text {
     position: absolute; left: 20px; top: 371px; width: 215px;
-    font-size: var(--type-meta); color: rgba(255, 255, 255, 0.85); font-weight: 400;
+    font-size: var(--type-meta); color: rgba(255, 255, 255, 0.72); font-weight: 400;
     line-height: 1.5; height: 36px; overflow: hidden;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-.profile-progress-container { position: absolute; left: 20px; top: 411px; width: 215px; }
+.profile-progress-container { position: absolute; left: 20px; top: 422px; width: 215px; }
 .profile-progress-val {
     position: absolute; right: 0; top: -14px;
     font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
@@ -1475,7 +1475,7 @@ body{
 .profile-btn:hover .btn-corner { border-color: rgba(255, 255, 255, 0.35) !important; }
 
 .btn-about {
-    top: 452px;
+    top: 468px;
     border: 1px solid rgba(147, 197, 253, 0.55) !important;
     background: linear-gradient(180deg, rgba(59, 130, 246, 0.16) 0%, rgba(37, 99, 235, 0.04) 100%) !important;
     box-shadow: inset 0 0 10px rgba(147, 197, 253, 0.25), 0 0 8px rgba(147, 197, 253, 0.1) !important;
@@ -1499,8 +1499,8 @@ body{
     text-shadow: 0 0 6px rgba(147, 197, 253, 0.95), 0 0 12px rgba(59, 130, 246, 0.8);
 }
 
-.btn-resume { top: 488px; }
-.btn-contact { top: 524px; }
+.btn-resume { top: 504px; }
+.btn-contact { top: 540px; }
 
 .btn-resume .btn-corner,
 .btn-contact .btn-corner       { border-color: rgba(255, 255, 255, 0.15) !important; }
@@ -2513,7 +2513,7 @@ body{
 }
 
 /* ── PROFILE DIVIDER 1 ── */
-#screen-home .divider-1 { top: 215px; }
+#screen-home .divider-1 { top: 200px; }
 
 /* ── HERO ID ── */
 #screen-home .hero-id {
