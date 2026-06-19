@@ -1,0 +1,1723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Orbit — AI-Native Case Study</title>
+<meta name="description" content="A research-oriented case study exploring the viability of autonomous and collaborative AI development pipelines in product design.">
+<link rel="stylesheet" href="typography.css">
+<style>
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       OVERRIDE VARIABLES FOR LIGHT EDITORIAL THEME
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    :root {
+        /* User-specified color system */
+        --color-bg-base: #F7F6F3;
+        --color-bg-surface: #FFFFFF;
+        --color-bg-surface-hover: #FCFAF7;
+        --color-border: #E4E1DA;
+        --color-border-hover: #C5C2BB;
+        
+        /* Overriding typography.css dark-mode text colors for light-mode */
+        --text-primary: #111111 !important;
+        --text-secondary: #5F5F5F !important;
+        --text-tertiary: #8A8780 !important;
+        --accent-cold-blue: #1A73E8 !important;
+        
+        /* Layout Configuration */
+        --reading-width: 680px;
+        --layout-width: 1100px;
+        --top-nav-height: 80px;
+    }
+
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    html {
+        scroll-behavior: smooth;
+        background-color: var(--color-bg-base);
+    }
+
+    body {
+        background: var(--color-bg-base) !important;
+        color: var(--text-primary) !important;
+        font-family: var(--font-primary);
+        line-height: 1.65;
+        min-height: 100vh;
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    /* Scrollbar Style */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+        background: var(--color-bg-base);
+    }
+    ::-webkit-scrollbar-thumb {
+        background: var(--color-border);
+        border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--color-border-hover);
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       TYPOGRAPHY ARCHITECTURE (Large Editorial Scale)
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    h1 {
+        font-size: var(--type-hero);
+        font-family: var(--font-primary);
+        font-weight: var(--weight-semibold);
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+        color: var(--text-primary);
+        margin-bottom: 24px;
+    }
+
+    h2 {
+        font-size: var(--type-h1);
+        font-family: var(--font-primary);
+        font-weight: var(--weight-semibold);
+        letter-spacing: -0.02em;
+        line-height: 1.25;
+        color: var(--text-primary);
+        margin-bottom: 20px;
+    }
+
+    h3 {
+        font-size: var(--type-h2);
+        font-family: var(--font-primary);
+        font-weight: var(--weight-semibold);
+        letter-spacing: -0.01em;
+        line-height: 1.35;
+        color: var(--text-primary);
+        margin-bottom: 16px;
+    }
+
+    h4 {
+        font-size: var(--type-h3);
+        font-family: var(--font-primary);
+        font-weight: var(--weight-semibold);
+        color: var(--text-primary);
+        margin-bottom: 12px;
+        letter-spacing: -0.01em;
+    }
+
+    p {
+        font-size: var(--type-body);
+        font-family: var(--font-primary);
+        font-weight: var(--weight-regular);
+        color: var(--text-secondary) !important;
+        margin-bottom: 24px;
+    }
+
+    p.lead-text {
+        font-size: var(--type-body-lg);
+        color: var(--text-primary) !important;
+        line-height: 1.6;
+        margin-bottom: 32px;
+    }
+
+    .code-style {
+        font-family: var(--font-mono);
+        background: rgba(0, 0, 0, 0.04);
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 0.85em;
+        border: 1px solid var(--color-border);
+        color: var(--text-primary);
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       LAYOUT & STRUCTURAL COMPONENTS
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .top-nav {
+        height: var(--top-nav-height);
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 40px;
+        border-bottom: 1px solid var(--color-border);
+        background: var(--color-bg-base);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    .nav-logo {
+        font-family: var(--font-mono);
+        font-size: var(--type-body-sm);
+        letter-spacing: 0.08em;
+        color: var(--text-primary);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: var(--weight-semibold);
+    }
+
+    .nav-logo-marker {
+        width: 6px;
+        height: 6px;
+        background-color: var(--text-primary);
+        border-radius: 50%;
+    }
+
+    .nav-back-button {
+        font-family: var(--font-primary);
+        font-size: var(--type-body-sm);
+        color: var(--text-secondary);
+        text-decoration: none;
+        transition: color 200ms ease;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .nav-back-button:hover {
+        color: var(--text-primary);
+    }
+
+    /* Central Layout Container */
+    .layout-wrapper {
+        max-width: var(--layout-width);
+        margin: 0 auto;
+        padding: 80px 24px 160px;
+        display: flex;
+        gap: 64px;
+        position: relative;
+    }
+
+    /* Sticky Sidebar Navigation */
+    .sidebar {
+        width: 240px;
+        flex-shrink: 0;
+        position: sticky;
+        top: calc(var(--top-nav-height) + 60px);
+        height: fit-content;
+    }
+
+    .toc-title {
+        font-family: var(--font-mono);
+        font-size: var(--type-micro);
+        color: var(--text-tertiary);
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        margin-bottom: 24px;
+        display: block;
+    }
+
+    .toc-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-bottom: 48px;
+    }
+
+    .toc-item a {
+        font-family: var(--font-mono);
+        font-size: var(--type-meta);
+        color: var(--text-tertiary);
+        text-decoration: none;
+        transition: color 200ms ease, padding-left 200ms ease;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        position: relative;
+        padding-left: 14px;
+    }
+
+    .toc-item a::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 2px;
+        height: 0;
+        background-color: var(--text-primary);
+        transition: height 200ms ease;
+    }
+
+    .toc-item.active a {
+        color: var(--text-primary);
+        padding-left: 20px;
+    }
+
+    .toc-item.active a::before {
+        height: 12px;
+    }
+
+    /* Sticky Sidebar Metadata block */
+    .sidebar-meta {
+        border-top: 1px solid var(--color-border);
+        padding-top: 32px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .meta-block {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .meta-block-label {
+        font-family: var(--font-mono);
+        font-size: var(--type-micro);
+        color: var(--text-tertiary);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    .meta-block-value {
+        font-family: var(--font-primary);
+        font-size: var(--type-body-sm);
+        color: var(--text-secondary);
+    }
+
+    /* Main Content Area */
+    .main-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    /* Section Spacing & Structure (Increased Vertical Rhythm) */
+    .case-section {
+        scroll-margin-top: calc(var(--top-nav-height) + 40px);
+        margin-bottom: 180px; /* Increased from 120px to let sections breathe */
+    }
+
+    .case-section:last-of-type {
+        margin-bottom: 0;
+    }
+
+    .section-label {
+        font-family: var(--font-mono);
+        font-size: var(--type-meta);
+        color: var(--text-tertiary);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+        display: block;
+    }
+
+    /* Column Width Constrainers */
+    .reading-width-col {
+        max-width: var(--reading-width);
+    }
+
+    .full-width-col {
+        max-width: 100%;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       IMAGE PLACEHOLDER COMPONENT (Stripe Press Aesthetic)
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .doc-asset-placeholder {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        max-height: 380px;
+        background: var(--color-bg-surface);
+        border: 1px dashed var(--color-border);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 48px;
+        margin-bottom: 16px;
+        transition: border-color 200ms ease;
+    }
+
+    .doc-asset-placeholder:hover {
+        border-color: var(--color-border-hover);
+    }
+
+    .doc-asset-text {
+        font-family: var(--font-mono);
+        font-size: var(--type-meta);
+        color: var(--text-tertiary);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-weight: 500;
+        user-select: none;
+    }
+
+    .doc-asset-caption {
+        font-family: var(--font-mono);
+        font-size: var(--type-micro);
+        color: var(--text-tertiary);
+        margin-bottom: 24px;
+        line-height: 1.5;
+        padding-left: 2px;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       RESEARCH-DOCUMENT VISUAL STRUCTURES
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    
+    /* Technical Schematic Block (Intro Visual) */
+    .intro-visual-container {
+        width: 100%;
+        height: 360px;
+        background: var(--color-bg-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 40px;
+    }
+
+    .diagram-grid-overlay {
+        position: absolute;
+        inset: 0;
+        background-image: linear-gradient(rgba(0, 0, 0, 0.015) 1px, transparent 1px),
+                          linear-gradient(90deg, rgba(0, 0, 0, 0.015) 1px, transparent 1px);
+        background-size: 24px 24px;
+        background-position: center;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .svg-canvas {
+        z-index: 2;
+        max-width: 100%;
+        max-height: 100%;
+    }
+
+    /* Structured System Grid */
+    .system-stack-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+        margin-top: 32px;
+    }
+
+    .stack-card {
+        background: var(--color-bg-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        padding: 28px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+
+    .card-top-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+
+    .card-title {
+        font-size: var(--type-h3);
+        font-weight: var(--weight-semibold);
+        color: var(--text-primary);
+        margin-bottom: 0;
+    }
+
+    .card-marker {
+        font-family: var(--font-mono);
+        font-size: var(--type-micro);
+        color: var(--text-secondary);
+        background: #F0EEE9;
+        padding: 3px 8px;
+        border-radius: 4px;
+        letter-spacing: 0.05em;
+        font-weight: 500;
+    }
+
+    .card-meta-list {
+        list-style: none;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid var(--color-border);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .card-meta-item {
+        display: flex;
+        justify-content: space-between;
+        font-size: var(--type-meta);
+    }
+
+    .card-meta-key {
+        font-family: var(--font-mono);
+        color: var(--text-tertiary);
+    }
+
+    .card-meta-val {
+        color: var(--text-secondary);
+    }
+
+    /* Workflow Diagram Box */
+    .diagram-container {
+        width: 100%;
+        background: var(--color-bg-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        padding: 48px 24px;
+        position: relative;
+        overflow: hidden;
+        margin-top: 32px;
+    }
+
+    .pipeline-flow {
+        display: flex;
+        justify-content: space-between;
+        align-items: stretch;
+        position: relative;
+        z-index: 2;
+        gap: 16px;
+    }
+
+    .pipeline-node {
+        flex: 1;
+        background: var(--color-bg-base);
+        border: 1px solid var(--color-border);
+        border-radius: 6px;
+        padding: 20px 16px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .pipeline-node-num {
+        font-family: var(--font-mono);
+        font-size: var(--type-micro);
+        color: var(--text-tertiary);
+        margin-bottom: 6px;
+        display: block;
+        font-weight: 500;
+    }
+
+    .pipeline-node-title {
+        font-size: var(--type-body-sm);
+        font-weight: var(--weight-semibold);
+        color: var(--text-primary);
+        margin-bottom: 8px;
+    }
+
+    .pipeline-node-desc {
+        font-size: var(--type-meta);
+        color: var(--text-secondary);
+        line-height: 1.4;
+    }
+
+    .pipeline-connector {
+        font-family: var(--font-mono);
+        color: var(--text-tertiary);
+        font-size: 16px;
+        user-select: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .diagram-caption {
+        font-family: var(--font-mono);
+        font-size: var(--type-micro);
+        color: var(--text-tertiary);
+        text-align: center;
+        margin-top: 24px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        z-index: 2;
+        position: relative;
+    }
+
+    /* Key Findings List */
+    .findings-list {
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+        margin-top: 32px;
+    }
+
+    .finding-item {
+        display: flex;
+        gap: 24px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .finding-item:last-child {
+        border-bottom: none;
+    }
+
+    .finding-num {
+        font-family: var(--font-mono);
+        font-size: var(--type-h2);
+        color: var(--text-primary);
+        font-weight: var(--weight-semibold);
+        line-height: 1;
+    }
+
+    .finding-body {
+        flex: 1;
+    }
+
+    .finding-title {
+        font-size: var(--type-h3);
+        font-weight: var(--weight-semibold);
+        color: var(--text-primary);
+        margin-bottom: 8px;
+    }
+
+    /* Framework Steps Layout */
+    .framework-timeline {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        margin-top: 32px;
+        position: relative;
+    }
+
+    .framework-timeline::before {
+        content: '';
+        position: absolute;
+        left: 20px;
+        top: 8px;
+        bottom: 8px;
+        width: 1px;
+        background: var(--color-border);
+    }
+
+    .framework-step {
+        display: flex;
+        gap: 24px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .step-marker {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--color-bg-surface);
+        border: 1px solid var(--color-border);
+        color: var(--text-primary);
+        font-family: var(--font-mono);
+        font-size: var(--type-body-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-weight: 500;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+
+    .step-content {
+        background: var(--color-bg-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        padding: 24px;
+        flex: 1;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+
+    .step-title {
+        font-size: var(--type-body-lg);
+        font-weight: var(--weight-semibold);
+        color: var(--text-primary);
+        margin-bottom: 8px;
+    }
+
+    .step-desc {
+        font-size: var(--type-body-sm);
+        color: var(--text-secondary);
+        line-height: 1.5;
+        margin-bottom: 0;
+    }
+
+    /* Final Outcome Mockup */
+    .browser-mockup {
+        width: 100%;
+        background: var(--color-bg-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        overflow: hidden;
+        margin-top: 32px;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.03);
+    }
+
+    .browser-header {
+        height: 40px;
+        background: #F0EEE9;
+        border-bottom: 1px solid var(--color-border);
+        display: flex;
+        align-items: center;
+        padding: 0 16px;
+        position: relative;
+    }
+
+    .browser-controls {
+        display: flex;
+        gap: 6px;
+    }
+
+    .browser-control {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--color-border);
+    }
+
+    .browser-url-bar {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 400px;
+        height: 24px;
+        background: var(--color-bg-surface);
+        border-radius: 6px;
+        border: 1px solid var(--color-border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-mono);
+        font-size: var(--type-micro);
+        color: var(--text-tertiary);
+        letter-spacing: 0.02em;
+    }
+
+    .browser-body {
+        height: 300px;
+        padding: 24px;
+        display: flex;
+        gap: 24px;
+        background: var(--color-bg-surface);
+        position: relative;
+    }
+
+    .mock-sidebar {
+        width: 120px;
+        border-right: 1px solid var(--color-border);
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding-right: 24px;
+    }
+
+    .mock-sidebar-line {
+        height: 8px;
+        background: #F0EEE9;
+        border-radius: 2px;
+        width: 100%;
+    }
+
+    .mock-sidebar-line.active {
+        background: var(--text-primary);
+        opacity: 0.6;
+    }
+
+    .mock-main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .mock-hero {
+        height: 70px;
+        background: var(--color-bg-base);
+        border: 1px solid var(--color-border);
+        border-radius: 6px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 0 16px;
+        gap: 8px;
+    }
+
+    .mock-line-lg {
+        height: 12px;
+        background: var(--color-border);
+        border-radius: 3px;
+        width: 180px;
+    }
+
+    .mock-line-sm {
+        height: 6px;
+        background: var(--color-border-hover);
+        border-radius: 2px;
+        width: 320px;
+    }
+
+    .mock-cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        flex: 1;
+    }
+
+    .mock-card {
+        background: var(--color-bg-base);
+        border: 1px solid var(--color-border);
+        border-radius: 6px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .mock-card-head {
+        height: 8px;
+        background: var(--color-border-hover);
+        border-radius: 2px;
+        width: 50px;
+    }
+
+    .mock-card-body {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        flex: 1;
+    }
+
+    .mock-card-line {
+        height: 4px;
+        background: var(--color-border);
+        border-radius: 1px;
+        width: 100%;
+    }
+
+    /* Asymmetric column layouts */
+    .two-col-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 48px;
+        margin-top: 32px;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       RESPONSIVE DESIGN (Desktop First)
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    @media (max-width: 992px) {
+        .layout-wrapper {
+            flex-direction: column;
+            padding-top: 40px;
+        }
+
+        .sidebar {
+            width: 100%;
+            position: relative;
+            top: 0;
+            margin-bottom: 40px;
+        }
+
+        .toc-list {
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 12px 24px;
+            margin-bottom: 24px;
+        }
+
+        .sidebar-meta {
+            display: none; /* Hide metadata on sidebar */
+        }
+
+        .system-stack-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .pipeline-flow {
+            flex-direction: column;
+        }
+
+        .pipeline-connector {
+            transform: rotate(90deg);
+            margin: 8px 0;
+        }
+
+        .two-col-layout {
+            grid-template-columns: 1fr;
+            gap: 32px;
+        }
+    }
+</style>
+</head>
+<body>
+
+    <!-- Semantic Top Navigation Header -->
+    <header class="top-nav">
+        <a href="index.html" class="nav-logo" id="logo-anchor">
+            <span class="nav-logo-marker"></span>
+            ORBIT // RESEARCH REPORT
+        </a>
+        <a href="index.html" class="nav-back-button" id="back-anchor">
+            ← Back to Portfolio
+        </a>
+    </header>
+
+    <!-- Page Content Wrapper -->
+    <div class="layout-wrapper">
+        
+        <!-- Sticky Sidebar Left -->
+        <aside class="sidebar">
+            <nav aria-label="Table of Contents">
+                <span class="toc-title">Structure</span>
+                <ul class="toc-list">
+                    <li class="toc-item active"><a href="#intro">01 / Intro</a></li>
+                    <li class="toc-item"><a href="#abandoned-portfolio">02 / Abandoned</a></li>
+                    <li class="toc-item"><a href="#restart">03 / Restart</a></li>
+                    <li class="toc-item"><a href="#wormhole">04 / Wormhole</a></li>
+                    <li class="toc-item"><a href="#portfolio">05 / Portfolio</a></li>
+                    <li class="toc-item"><a href="#antigravity">06 / Antigravity</a></li>
+                    <li class="toc-item"><a href="#content-system">07 / Content</a></li>
+                    <li class="toc-item"><a href="#lessons">08 / Findings</a></li>
+                    <li class="toc-item"><a href="#framework">09 / Framework</a></li>
+                </ul>
+            </nav>
+
+            <!-- Metadata Panel -->
+            <div class="sidebar-meta">
+                <div class="meta-block">
+                    <span class="meta-block-label">Operator Role</span>
+                    <span class="meta-block-value">Systems Designer</span>
+                </div>
+                <div class="meta-block">
+                    <span class="meta-block-label">Methodology</span>
+                    <span class="meta-block-value">AI-Native Pipeline</span>
+                </div>
+                <div class="meta-block">
+                    <span class="meta-block-label">Timeframe</span>
+                    <span class="meta-block-value">Q2 2026</span>
+                </div>
+                <div class="meta-block">
+                    <span class="meta-block-label">Status</span>
+                    <span class="meta-block-value">Active Inquiry</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Scrolling Content Right -->
+        <main class="main-content" style="max-width: 900px;">
+            
+            <!-- SECTION 01: Introduction -->
+            <section id="intro" class="case-section full-width-col">
+                <span class="section-label">01 / INTRODUCTION</span>
+                <h1>Project Orbit</h1>
+                <p class="lead-text">
+                    A one-month experiment in building and shipping a real product through collaboration with AI systems.
+                </p>
+                <div class="reading-width-col">
+                    <p>
+                        What began as a portfolio website evolved into a study of how designers can work alongside intelligent systems to create, iterate, and launch digital products. Rather than following a traditional workflow built around design tools and engineering teams, Project Orbit explored a different question: what happens when AI becomes part of the creative process itself?
+                    </p>
+                    <p class="lead-text" style="border-left: 3px solid var(--text-primary); padding-left: 28px; font-style: italic; margin-top: 40px; margin-bottom: 40px;">
+                        Can a designer with almost no coding experience build and ship a production-ready product using AI systems instead of a traditional design and engineering workflow?
+                    </p>
+                    <p>
+                        Over the past few years, AI tools have become increasingly capable of generating interfaces, writing code, and producing creative outputs. Most discussions around these tools focus on what they can generate. Far fewer explore how they fit into a real product development process.
+                    </p>
+                    <p>
+                        Project Orbit was created to answer that question through practice rather than speculation. Instead of treating AI as a feature or a productivity tool, this project treated AI systems as collaborators. The goal was not simply to build a portfolio website. The goal was to understand where AI excels, where it fails, and what role human judgment still plays in the process of designing and shipping a product.
+                    </p>
+                </div>
+                
+                <!-- Hero Visual Blueprint -->
+                <div class="intro-visual-container">
+                    <div class="diagram-grid-overlay"></div>
+                    <svg width="600" height="300" viewBox="0 0 600 300" fill="none" class="svg-canvas" aria-label="Systems synthesis technical blueprint diagram">
+                        <line x1="50" y1="50" x2="550" y2="50" stroke="var(--color-border)" stroke-width="1" />
+                        <line x1="50" y1="250" x2="550" y2="250" stroke="var(--color-border)" stroke-width="1" />
+                        <line x1="300" y1="50" x2="300" y2="250" stroke="var(--color-border)" stroke-width="1" stroke-dasharray="2 2" />
+                        
+                        <rect x="80" y="90" width="160" height="120" rx="4" fill="var(--color-bg-base)" stroke="var(--color-border)" stroke-width="1.5" />
+                        <text x="160" y="115" text-anchor="middle" fill="var(--text-primary)" font-family="var(--font-mono)" font-size="9px" font-weight="600">DESIGN CANVAS</text>
+                        <line x1="100" y1="140" x2="220" y2="140" stroke="var(--color-border-hover)" stroke-width="1" />
+                        <line x1="100" y1="160" x2="180" y2="160" stroke="var(--color-border-hover)" stroke-width="1" />
+                        <circle cx="160" cy="180" r="10" stroke="var(--color-border-hover)" stroke-width="1" />
+                        
+                        <circle cx="300" cy="150" r="18" fill="var(--color-bg-surface)" stroke="var(--text-primary)" stroke-width="1.5" />
+                        <text x="300" y="153" text-anchor="middle" fill="var(--text-primary)" font-family="var(--font-mono)" font-size="8px" font-weight="600">SYNTHESIS</text>
+
+                        <rect x="360" y="90" width="160" height="120" rx="4" fill="var(--color-bg-base)" stroke="var(--color-border)" stroke-width="1.5" />
+                        <text x="440" y="115" text-anchor="middle" fill="var(--text-primary)" font-family="var(--font-mono)" font-size="9px" font-weight="600">WORKSPACE EXECUTION</text>
+                        <line x1="380" y1="140" x2="480" y2="140" stroke="var(--text-tertiary)" stroke-width="1.5" />
+                        <line x1="380" y1="155" x2="450" y2="155" stroke="var(--text-tertiary)" stroke-width="1.5" />
+                        <line x1="380" y1="170" x2="490" y2="170" stroke="var(--text-tertiary)" stroke-width="1.5" />
+                        <line x1="380" y1="185" x2="420" y2="185" stroke="var(--text-tertiary)" stroke-width="1.5" />
+                    </svg>
+                </div>
+
+                <!-- Section 01 Image Placeholder -->
+                <div class="doc-asset-placeholder">
+                    <span class="doc-asset-text">[ Documentation Asset 01 — Context & Experiment Scope ]</span>
+                </div>
+                <div class="doc-asset-caption">Figure 01 — Git repository initialization and the parameters of the one-month workspace exploration.</div>
+            </section>
+
+            <!-- SECTION 02: The Abandoned Portfolio -->
+            <section id="abandoned-portfolio" class="case-section reading-width-col">
+                <span class="section-label">02 / HISTORICAL</span>
+                <h2>The Abandoned Portfolio</h2>
+                <p class="lead-text">
+                    Before Orbit, there was another portfolio.
+                </p>
+                <p>
+                    The original concept followed a neubrutalist design language built around bold typography, strong borders, hard shadows, and a split-panel layout. It contained many of the same ideas that would eventually appear in Orbit.
+                </p>
+                <p>
+                    The design was functional, but something felt off.
+                </p>
+                <p>
+                    The visual language lacked maturity, the layout felt constrained, and more importantly, the process itself was becoming difficult to sustain. As conversations with AI systems grew longer, context was lost between sessions. Ideas became fragmented. Decisions were repeated. Progress slowed.
+                </p>
+                <p>
+                    The biggest problem was not the design. It was continuity.
+                </p>
+                <p>
+                    That realization became the first major discovery of the project: when working with AI systems, maintaining context is often more difficult than generating ideas. The portfolio was eventually abandoned, but the lessons it revealed became the foundation of everything that followed.
+                </p>
+
+                <!-- Section 02 Image Placeholder -->
+                <div class="doc-asset-placeholder">
+                    <span class="doc-asset-text">[ Documentation Asset 02 — Neubrutalist Layout Trials ]</span>
+                </div>
+                <div class="doc-asset-caption">Figure 02 — Screen records of early neubrutalist layout trials showing layout constraints and visual bottlenecks.</div>
+            </section>
+
+            <!-- SECTION 03: The Restart -->
+            <section id="restart" class="case-section reading-width-col">
+                <span class="section-label">03 / STRATEGY</span>
+                <h2>The Restart</h2>
+                <p class="lead-text">
+                    Orbit began with a restart.
+                </p>
+                <p>
+                    Rather than redesigning the existing portfolio, the decision was made to rebuild the project from the ground up and use the process itself as the subject of the case study.
+                </p>
+                <p>
+                    At the same time, a new visual direction emerged. Inspired by cinematic environments, large-scale landscapes, and the contrast between human presence and machine systems, the portfolio adopted a more atmospheric identity.
+                </p>
+                <p>
+                    More importantly, the workflow changed.
+                </p>
+                <p>
+                    Instead of moving between traditional design tools and development environments, the project was structured around a network of AI systems. Each tool was assigned a specific responsibility. Some generated ideas. Some created screens. Some wrote code. Others managed content.
+                </p>
+                <p>
+                    This shift produced a second major discovery: the most effective AI workflows are not built around a single powerful model. They emerge when multiple systems are given clear roles, responsibilities, and constraints. Project Orbit stopped being a portfolio project at that moment. It became an experiment.
+                </p>
+
+                <!-- Section 03 Image Placeholder -->
+                <div class="doc-asset-placeholder">
+                    <span class="doc-asset-text">[ Documentation Asset 03 — Multi-Agent Stack Allocation ]</span>
+                </div>
+                <div class="doc-asset-caption">Figure 03 — Role allocation mappings and terminal task matrices established during the project restart.</div>
+            </section>
+
+            <!-- SECTION 04: Building The Wormhole -->
+            <section id="wormhole" class="case-section full-width-col">
+                <div class="reading-width-col">
+                    <span class="section-label">04 / FLOW ARCHITECTURE</span>
+                    <h2>Building The Wormhole</h2>
+                    <p>
+                        The first challenge was creating the opening experience.
+                    </p>
+                    <p>
+                        From the beginning, I wanted the website to feel less like a portfolio and more like entering a different environment. The idea eventually evolved into a wormhole sequence that acts as a transition between the outside world and the portfolio itself.
+                    </p>
+                    <p>
+                        My initial attempts relied heavily on prompting AI systems to generate the effect from descriptions. The results were inconsistent. Every implementation behaved differently, and each iteration introduced new problems.
+                    </p>
+                    <p>
+                        The breakthrough came when I stopped asking AI to invent the effect and instead asked it to adapt an existing one.
+                    </p>
+                    <p>
+                        A reference implementation built with Three.js and GSAP became the foundation. Rather than generating the system from scratch, the process shifted toward understanding, modifying, and extending working code.
+                    </p>
+                    <p>
+                        This produced one of the most important discoveries of the project.
+                    </p>
+                    <p>
+                        Building with AI is often less about generation and more about transformation. Modifying a working reference is significantly more reliable than asking a model to invent a complex technical system from a text prompt.
+                    </p>
+                    <p>
+                        The final sequence introduced multiple custom layers, including cinematic tunnel typography, a white flash transition, independent scroll logic, and a strict separation between the wormhole experience and the portfolio itself.
+                    </p>
+                    <p>
+                        The wormhole eventually became one of the few parts of the project that was permanently locked. Once it worked, it was never touched again.
+                    </p>
+                    
+                    <div style="border-left: 2px solid var(--text-primary); padding-left: 20px; margin-top: 32px; margin-bottom: 32px;">
+                        <span style="font-family: var(--font-mono); font-size: var(--type-micro); color: var(--text-tertiary); text-transform: uppercase; display: block; margin-bottom: 6px;">KEY TAKEAWAY</span>
+                        <p style="font-size: var(--type-body-sm); font-weight: var(--weight-semibold); color: var(--text-primary) !important; margin-bottom: 0;">
+                            Reference-first workflows consistently outperformed generation-first workflows when building complex interactions.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Workflow diagram placeholder -->
+                <div class="diagram-container">
+                    <div class="diagram-grid-overlay"></div>
+                    <div class="pipeline-flow">
+                        <div class="pipeline-node">
+                            <span class="pipeline-node-num">01 / INTENT</span>
+                            <h4 class="pipeline-node-title">Operator Prompt</h4>
+                            <p class="pipeline-node-desc">Human structures objectives and establishes boundary constraints.</p>
+                        </div>
+                        <div class="pipeline-connector">→</div>
+                        <div class="pipeline-node">
+                            <span class="pipeline-node-num">02 / PARSE</span>
+                            <h4 class="pipeline-node-title">Orchestration</h4>
+                            <p class="pipeline-node-desc">Antigravity analyzes task scope and allocates to specialized sub-agents.</p>
+                        </div>
+                        <div class="pipeline-connector">→</div>
+                        <div class="pipeline-node">
+                            <span class="pipeline-node-num">03 / WRITE</span>
+                            <h4 class="pipeline-node-title">Code Execution</h4>
+                            <p class="pipeline-node-desc">Claude Code writes modifications directly within terminal sandbox environment.</p>
+                        </div>
+                    </div>
+                    <div class="diagram-caption">Figure 4.1: Context loop architecture for collaborative system integration.</div>
+                </div>
+
+                <!-- Section 04 Image Placeholder -->
+                <div class="doc-asset-placeholder">
+                    <span class="doc-asset-text">[ Documentation Asset 04 — Wormhole Context Maps ]</span>
+                </div>
+                <div class="doc-asset-caption">Figure 04 — Context transfer mapping and semantic data pipeline structures.</div>
+            </section>
+
+            <!-- SECTION 05: Building The Portfolio -->
+            <section id="portfolio" class="case-section full-width-col">
+                <div class="reading-width-col">
+                    <span class="section-label">05 / INTERFACE DEVELOPMENT</span>
+                    <h2>Building The Portfolio</h2>
+                    <p>
+                        With the wormhole complete, attention shifted toward the portfolio itself.
+                    </p>
+                    <p>
+                        The original vision involved a highly layered environment built from multiple generated image assets. The plan was to create depth through a parallax system composed of independent foreground, midground, and background layers.
+                    </p>
+                    <p>
+                        On paper, the approach seemed promising.
+                    </p>
+                    <p>
+                        In practice, it became one of the project's first major failures.
+                    </p>
+                    <p>
+                        The generated assets did not align with the assumptions made by the implementation. Dimensions were inconsistent, loops broke unexpectedly, and visual quality varied between generations. Significant effort was spent attempting to repair a system that fundamentally wasn't working.
+                    </p>
+                    <p>
+                        Eventually the decision was made to abandon the entire approach.
+                    </p>
+                    <p>
+                        Instead of fighting the limitations of the parallax system, it was replaced with a cinematic looping video background.
+                    </p>
+                    <p>
+                        The replacement solved multiple problems simultaneously. Visual consistency improved, technical complexity decreased, and the overall atmosphere became significantly stronger.
+                    </p>
+                    <p>
+                        A similar evolution occurred with the glass system used throughout the interface.
+                    </p>
+                    <p>
+                        Several approaches were explored before eventually arriving at a simplified crystal-glass treatment that delivered the desired visual quality without introducing unnecessary implementation complexity.
+                    </p>
+                    <p>
+                        This phase reinforced another recurring lesson.
+                    </p>
+                    <p>
+                        The best solution is not always the most ambitious solution. Sometimes the most effective decision is recognizing when to stop investing in a direction that is no longer producing results.
+                    </p>
+                    
+                    <div style="border-left: 2px solid var(--text-primary); padding-left: 20px; margin-top: 32px; margin-bottom: 32px;">
+                        <span style="font-family: var(--font-mono); font-size: var(--type-micro); color: var(--text-tertiary); text-transform: uppercase; display: block; margin-bottom: 6px;">KEY TAKEAWAY</span>
+                        <p style="font-size: var(--type-body-sm); font-weight: var(--weight-semibold); color: var(--text-primary) !important; margin-bottom: 0;">
+                            Knowing when to abandon an idea is often more valuable than knowing how to improve it.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Structured Tool Grid -->
+                <div class="system-stack-grid">
+                    <div class="stack-card">
+                        <div class="card-top-row">
+                            <h3 class="card-title">Claude Code</h3>
+                            <span class="card-marker">CLI EXECUTION</span>
+                        </div>
+                        <p style="font-size: var(--type-body-sm); margin-bottom: 0;">
+                            Command-line interface agent configured for rapid codebase traversal, file reading/writing, and direct script execution. Acts as the execution engine for codebase operations.
+                        </p>
+                        <ul class="card-meta-list">
+                            <li class="card-meta-item"><span class="card-meta-key">Context Depth</span><span class="card-meta-val">Local System</span></li>
+                            <li class="card-meta-item"><span class="card-meta-key">Primary Role</span><span class="card-meta-val">File Editing & Testing</span></li>
+                        </ul>
+                    </div>
+
+                    <div class="stack-card">
+                        <div class="card-top-row">
+                            <h3 class="card-title">Claude</h3>
+                            <span class="card-marker">ARCHITECT</span>
+                        </div>
+                        <p style="font-size: var(--type-body-sm); margin-bottom: 0;">
+                            High-intelligence synthesis model used for architectural planning, design system metadesign, and complex JavaScript rendering logic.
+                        </p>
+                        <ul class="card-meta-list">
+                            <li class="card-meta-item"><span class="card-meta-key">Context Depth</span><span class="card-meta-val">Project Scope</span></li>
+                            <li class="card-meta-item"><span class="card-meta-key">Primary Role</span><span class="card-meta-val">Logic & Layout Planning</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Section 05 Image Placeholder -->
+                <div class="doc-asset-placeholder">
+                    <span class="doc-asset-text">[ Documentation Asset 05 — Portfolio Assembly Drafts ]</span>
+                </div>
+                <div class="doc-asset-caption">Figure 05 — Early layout assemblies and HTML/CSS structural verification passes.</div>
+            </section>
+
+            <!-- SECTION 06: Building With Antigravity -->
+            <section id="antigravity" class="case-section reading-width-col">
+                <span class="section-label">06 / SYSTEM CONTROL</span>
+                <h2>Building With Antigravity</h2>
+                <p>
+                    As the portfolio evolved, a clear pattern began to emerge.
+                </p>
+                <p>
+                    While Claude consistently performed well when solving logical, architectural, and implementation problems, it struggled with visual execution. Layout exploration often required multiple iterations, visual hierarchy was difficult to communicate through text alone, and translating aesthetic intent into working interfaces became increasingly inefficient.
+                </p>
+                <p>
+                    The portfolio itself was highly visual.
+                </p>
+                <p>
+                    Many of the decisions being made were not technical decisions. They were design decisions involving composition, hierarchy, spacing, balance, and visual storytelling.
+                </p>
+                <p>
+                    After several rounds of experimentation, it became clear that different systems were better suited to different responsibilities.
+                </p>
+                <p>
+                    Claude became responsible for strategy, architecture, implementation planning, debugging, and technical decision-making.
+                </p>
+                <p>
+                    Antigravity became responsible for interface creation, layout exploration, visual composition, and screen design.
+                </p>
+                <p>
+                    Rather than designing directly inside the production codebase, every major screen was first created as an isolated HTML prototype inside Antigravity. The Home screen, Project screen, Chat interface, and About page were all designed independently before being integrated into the final product.
+                </p>
+                <p>
+                    This shift dramatically improved the workflow.
+                </p>
+                <p>
+                    Visual problems could be solved visually.
+                </p>
+                <p>
+                    Technical problems could be solved technically.
+                </p>
+                <p>
+                    For the first time, responsibilities were clearly distributed across the system.
+                </p>
+                <p>
+                    However, integrating Antigravity outputs introduced a new class of challenges. Different layout philosophies frequently collided. Absolute positioning conflicted with flexible layouts. Shared styles leaked between screens. Components behaved differently once integrated into the live environment.
+                </p>
+                <p>
+                    To solve this, a repeatable integration methodology was developed.
+                </p>
+                <p>
+                    Every screen followed the same process:
+                </p>
+                <p>
+                    Audit first.
+                </p>
+                <p>
+                    Identify conflicts.
+                </p>
+                <p>
+                    Scope styles.
+                </p>
+                <p>
+                    Integrate in isolation.
+                </p>
+                <p>
+                    Verify before continuing.
+                </p>
+                <p>
+                    Over time this methodology became one of the most transferable outcomes of the project.
+                </p>
+                <p>
+                    The lesson extended beyond Antigravity itself.
+                </p>
+                <p>
+                    Successful AI workflows are rarely about finding the perfect tool. They are about understanding the strengths of each system and assigning responsibilities accordingly.
+                </p>
+                
+                <div style="border-left: 2px solid var(--text-primary); padding-left: 20px; margin-top: 32px; margin-bottom: 32px;">
+                    <span style="font-family: var(--font-mono); font-size: var(--type-micro); color: var(--text-tertiary); text-transform: uppercase; display: block; margin-bottom: 6px;">KEY TAKEAWAY</span>
+                    <p style="font-size: var(--type-body-sm); font-weight: var(--weight-semibold); color: var(--text-primary) !important; margin-bottom: 0;">
+                        The most effective AI workflows emerge when every system is used for what it does best.
+                    </p>
+                </div>
+
+                <!-- Section 06 Image Placeholder -->
+                <div class="doc-asset-placeholder">
+                    <span class="doc-asset-text">[ Documentation Asset 06 — Antigravity Session Logs ]</span>
+                </div>
+                <div class="doc-asset-caption">Figure 06 — Antigravity command logs and terminal tracking markers showing environment context history.</div>
+            </section>
+
+            <!-- SECTION 07: Building The Content System -->
+            <section id="content-system" class="case-section reading-width-col">
+                <span class="section-label">07 / CONTENT DATABASE</span>
+                <h2>Building The Content System</h2>
+                <p>
+                    By this stage, the portfolio was live, functional, and visually complete. The next challenge was content management.
+                </p>
+                <p>
+                    Initially, I considered building a custom CMS directly into the project. On paper, the idea sounded attractive. Complete control, custom workflows, and a system built specifically for the portfolio.
+                </p>
+                <p>
+                    However, after evaluating the scope of the work, it became clear that building a CMS would add significant complexity to a project that was already exploring enough unknowns.
+                </p>
+                <p>
+                    The question became simple.
+                </p>
+                <p>
+                    Should I spend my time building a content management system, or should I spend my time improving the portfolio itself?
+                </p>
+                <p>
+                    The answer was obvious.
+                </p>
+                <p>
+                    Sanity was selected as the content layer for the project. It provided a free, flexible, and production-ready solution that could manage projects, chatbot responses, profile information, and future content without requiring additional infrastructure.
+                </p>
+                <p>
+                    The integration process was far more challenging than the decision itself.
+                </p>
+                <p>
+                    Several attempts to connect Sanity to the frontend resulted in unexpected failures. The most frustrating part was that the changes often looked correct. The code appeared valid. The diffs looked clean. Yet the application continued to break.
+                </p>
+                <p>
+                    Eventually I discovered that visual inspection was not enough.
+                </p>
+                <p>
+                    A change that looks correct is not necessarily a change that works.
+                </p>
+                <p>
+                    This realization led to the introduction of validation steps after every modification. Automated checks, controlled replacements, isolated testing, and rapid rollbacks became part of the workflow.
+                </p>
+                <p>
+                    The experience fundamentally changed how I approached AI-assisted development.
+                </p>
+                <p>
+                    Instead of trusting outputs, I learned to trust verification.
+                </p>
+                <p>
+                    By the end of this phase, projects, profile data, chatbot responses, and portfolio content were all being managed through Sanity, turning the portfolio into a maintainable product rather than a collection of static pages.
+                </p>
+                
+                <div style="border-left: 2px solid var(--text-primary); padding-left: 20px; margin-top: 32px; margin-bottom: 32px;">
+                    <span style="font-family: var(--font-mono); font-size: var(--type-micro); color: var(--text-tertiary); text-transform: uppercase; display: block; margin-bottom: 6px;">KEY TAKEAWAY</span>
+                    <p style="font-size: var(--type-body-sm); font-weight: var(--weight-semibold); color: var(--text-primary) !important; margin-bottom: 0;">
+                        Verification is more important than implementation. A convincing output means nothing until it has been validated.
+                    </p>
+                </div>
+
+                <!-- Section 07 Image Placeholder -->
+                <div class="doc-asset-placeholder">
+                    <span class="doc-asset-text">[ Documentation Asset 07 — CMS Schema Declarations ]</span>
+                </div>
+                <div class="doc-asset-caption">Figure 07 — CMS schemas and dynamic content query payloads in Sanity.</div>
+            </section>
+
+
+
+            <!-- SECTION 08: Major Findings -->
+            <section id="lessons" class="case-section reading-width-col">
+                <span class="section-label">08 / RETROSPECTIVE</span>
+                <h2>Major Findings</h2>
+                <p>
+                    When Project Orbit began, I expected to learn how to use AI tools more effectively.
+                </p>
+                <p>
+                    What I discovered was something very different.
+                </p>
+                <p>
+                    The project was never limited by generation.
+                </p>
+                <p>
+                    It was limited by continuity.
+                </p>
+                <p>
+                    Throughout the process, AI systems proved remarkably capable of producing ideas, interfaces, code, and content. The challenge was rarely creating something new. The challenge was maintaining context, preserving decisions, and ensuring that progress remained coherent over time.
+                </p>
+                <p>
+                    This led to several principles that repeatedly proved themselves throughout the project.
+                </p>
+
+                <div class="findings-list">
+                    <div class="finding-item">
+                        <span class="finding-num">01</span>
+                        <div class="finding-body">
+                            <h4 class="finding-title">Continuity Over Generation</h4>
+                            <p style="font-size: var(--type-body-sm); line-height: 1.5; margin-bottom: 0; color: var(--text-secondary) !important;">
+                                Maintaining stable context state and preserving architectural choices is more critical than producing high volumes of new outputs.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="finding-item">
+                        <span class="finding-num">02</span>
+                        <div class="finding-body">
+                            <h4 class="finding-title">Reference-Based Adaptation</h4>
+                            <p style="font-size: var(--type-body-sm); line-height: 1.5; margin-bottom: 0; color: var(--text-secondary) !important;">
+                                Adapting and transforming working implementations consistently outperforms prompt-based generation-from-scratch as system complexity scales.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="finding-item">
+                        <span class="finding-num">03</span>
+                        <div class="finding-body">
+                            <h4 class="finding-title">Clear Role Distribution</h4>
+                            <p style="font-size: var(--type-body-sm); line-height: 1.5; margin-bottom: 0; color: var(--text-secondary) !important;">
+                                AI nodes yield superior performance and visual fidelity when assigned highly specific, separated design vs. code execution responsibilities.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="finding-item">
+                        <span class="finding-num">04</span>
+                        <div class="finding-body">
+                            <h4 class="finding-title">Mandatory Verification</h4>
+                            <p style="font-size: var(--type-body-sm); line-height: 1.5; margin-bottom: 0; color: var(--text-secondary) !important;">
+                                Code inspection, unit testing, and design-match audits are essential, non-optional steps. Convincing output must be verified before commit.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="finding-item">
+                        <span class="finding-num">05</span>
+                        <div class="finding-body">
+                            <h4 class="finding-title">Code Protection</h4>
+                            <p style="font-size: var(--type-body-sm); line-height: 1.5; margin-bottom: 0; color: var(--text-secondary) !important;">
+                                Verified modules and working features must be locked and isolated rather than continuously exposed to model edits.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="finding-item">
+                        <span class="finding-num">06</span>
+                        <div class="finding-body">
+                            <h4 class="finding-title">Documentation as Infrastructure</h4>
+                            <p style="font-size: var(--type-body-sm); line-height: 1.5; margin-bottom: 0; color: var(--text-secondary) !important;">
+                                Maintaining local task guides and metadoc plans acts as active system memory rather than administrative overhead.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <p style="margin-top: 40px;">
+                    Perhaps the most important lesson was understanding the role of the designer within an AI-assisted workflow.
+                </p>
+                <p>
+                    AI accelerated execution. It accelerated exploration. It accelerated iteration. But it never replaced judgment.
+                </p>
+                <p>
+                    The quality of the final product remained directly connected to the quality of decisions being made throughout the process.
+                </p>
+                <p>
+                    Project Orbit ultimately changed the way I think about design.
+                </p>
+                <p>
+                    The future is not designers versus AI.
+                </p>
+                <p>
+                    The future is designers learning how to direct increasingly capable systems while retaining ownership of vision, taste, and decision-making.
+                </p>
+
+                <div style="border-left: 2px solid var(--text-primary); padding-left: 20px; margin-top: 32px; margin-bottom: 32px;">
+                    <span style="font-family: var(--font-mono); font-size: var(--type-micro); color: var(--text-tertiary); text-transform: uppercase; display: block; margin-bottom: 6px;">KEY TAKEAWAY</span>
+                    <p style="font-size: var(--type-body-sm); font-weight: var(--weight-semibold); color: var(--text-primary) !important; margin-bottom: 0;">
+                        The value of a designer shifts from producing outputs to directing systems capable of producing them.
+                    </p>
+                </div>
+
+                <!-- Section 08 Image Placeholder -->
+                <div class="doc-asset-placeholder">
+                    <span class="doc-asset-text">[ Documentation Asset 08 — Context Scaling Logs ]</span>
+                </div>
+                <div class="doc-asset-caption">Figure 08 — Context degradation logs during multi-hour operational loops.</div>
+            </section>
+
+            <!-- SECTION 09: The Orbit Framework -->
+            <section id="framework" class="case-section full-width-col">
+                <div class="reading-width-col">
+                    <span class="section-label">09 / SYNTHESIS</span>
+                    <h2>The Orbit Framework</h2>
+                    <p>
+                        Project Orbit began as an attempt to answer a simple question.
+                    </p>
+                    <p>
+                        Can a designer with almost no coding experience build and ship a real product through collaboration with AI systems?
+                    </p>
+                    <p>
+                        Over the course of a month, the answer gradually became clear.
+                    </p>
+                    <p>
+                        The success of the project was never determined by the quality of a single model, a single prompt, or a single tool.
+                    </p>
+                    <p>
+                        Instead, it emerged from the relationship between systems.
+                    </p>
+                    <p>
+                        Every tool played a different role. Some generated ideas. Some designed interfaces. Some wrote code. Some managed content.
+                    </p>
+                    <p>
+                        The challenge was never finding the perfect AI. The challenge was creating a workflow where each system could contribute its strengths while minimizing its weaknesses.
+                    </p>
+                    <p>
+                        Through dozens of iterations, failures, restarts, integrations, and refinements, a repeatable framework began to emerge.
+                    </p>
+                </div>
+
+                <!-- Vertical Framework Timeline -->
+                <div class="framework-timeline">
+                    <!-- Step 1 -->
+                    <div class="framework-step">
+                        <div class="step-marker">01</div>
+                        <div class="step-content">
+                            <h4 class="step-title">QUESTION</h4>
+                            <p class="step-desc">Start with a clear problem rather than a tool.</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="framework-step">
+                        <div class="step-marker">02</div>
+                        <div class="step-content">
+                            <h4 class="step-title">REFERENCE</h4>
+                            <p class="step-desc">Find working examples before attempting generation.</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="framework-step">
+                        <div class="step-marker">03</div>
+                        <div class="step-content">
+                            <h4 class="step-title">GENERATE</h4>
+                            <p class="step-desc">Use AI systems to explore possibilities and directions.</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div class="framework-step">
+                        <div class="step-marker">04</div>
+                        <div class="step-content">
+                            <h4 class="step-title">REFINE</h4>
+                            <p class="step-desc">Apply human judgment to identify what deserves further development.</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 5 -->
+                    <div class="framework-step">
+                        <div class="step-marker">05</div>
+                        <div class="step-content">
+                            <h4 class="step-title">BUILD</h4>
+                            <p class="step-desc">Use specialized systems for execution.</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 6 -->
+                    <div class="framework-step">
+                        <div class="step-marker">06</div>
+                        <div class="step-content">
+                            <h4 class="step-title">VERIFY</h4>
+                            <p class="step-desc">Validate every implementation before trusting it.</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 7 -->
+                    <div class="framework-step">
+                        <div class="step-marker">07</div>
+                        <div class="step-content">
+                            <h4 class="step-title">DOCUMENT</h4>
+                            <p class="step-desc">Preserve context, decisions, and discoveries.</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 8 -->
+                    <div class="framework-step">
+                        <div class="step-marker">08</div>
+                        <div class="step-content">
+                            <h4 class="step-title">ITERATE</h4>
+                            <p class="step-desc">Repeat the process while maintaining continuity.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reading-width-col" style="margin-top: 48px;">
+                    <p>
+                        This framework became the most valuable outcome of the project. It transformed AI from a collection of tools into a collaborative system.
+                    </p>
+                    <p>
+                        More importantly, it revealed where human designers continue to create value.
+                    </p>
+                    <p>
+                        AI accelerated execution. AI accelerated exploration. AI accelerated iteration. But vision, judgment, prioritization, and decision-making remained human responsibilities throughout the process.
+                    </p>
+                    <p>
+                        The final portfolio became evidence of that collaboration. A cinematic website. A custom CMS. A documentation system. A chatbot. A multi-screen experience. A complete product designed, built, deployed, and maintained through a workflow that would not have existed even a few years ago.
+                    </p>
+                    <p>
+                        Project Orbit started as a portfolio. It evolved into an experiment.
+                    </p>
+                    <p>
+                        It ultimately became a study of how designers can work alongside increasingly capable systems without losing ownership of the creative process.
+                    </p>
+                    <p>
+                        The website was the deliverable. The workflow became the discovery.
+                    </p>
+
+                    <div style="border-left: 2px solid var(--text-primary); padding-left: 20px; margin-top: 32px; margin-bottom: 32px;">
+                        <span style="font-family: var(--font-mono); font-size: var(--type-micro); color: var(--text-tertiary); text-transform: uppercase; display: block; margin-bottom: 6px;">KEY TAKEAWAY</span>
+                        <p style="font-size: var(--type-body-sm); font-weight: var(--weight-semibold); color: var(--text-primary) !important; margin-bottom: 0;">
+                            The future of product design is not defined by AI replacing designers. It is defined by designers learning how to direct, orchestrate, and collaborate with intelligent systems.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Section 09 Image Placeholder A -->
+                <div class="doc-asset-placeholder">
+                    <span class="doc-asset-text">[ Documentation Asset 09A — The Orbit Framework Mappings ]</span>
+                </div>
+                <div class="doc-asset-caption">Figure 09a — High-level layout orchestrations within the finalized Orbit framework.</div>
+
+                <!-- Section 09 Image Placeholder B -->
+                <div class="doc-asset-placeholder">
+                    <span class="doc-asset-text">[ Documentation Asset 09B — AI Node Responsibility Matrix ]</span>
+                </div>
+                <div class="doc-asset-caption">Figure 09b — System role mapping showing task distribution bounds.</div>
+
+                <!-- Section 09 Image Placeholder C -->
+                <div class="doc-asset-placeholder">
+                    <span class="doc-asset-text">[ Documentation Asset 09C — Project Context Logs ]</span>
+                </div>
+                <div class="doc-asset-caption">Figure 09c — Terminal logs and active repository checks during system verification.</div>
+            </section>
+
+
+
+        </main>
+    </div>
+
+    <!-- Small footer element -->
+    <footer style="text-align: center; padding: 64px 48px; border-top: 1px solid var(--color-border); font-family: var(--font-mono); font-size: var(--type-micro); color: var(--text-tertiary); letter-spacing: 0.08em; text-transform: uppercase; background: var(--color-bg-base);">
+        PROJECT ORBIT // AI-NATIVE RESEARCH LAB
+    </footer>
+
+    <!-- Interactive Script for Sidebar Navigation Highlight & Scroll Synchronization -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('.case-section');
+            const tocItems = document.querySelectorAll('.toc-item');
+            
+            // Map to track the intersection state of each section
+            const intersectionMap = new Map();
+            sections.forEach(section => {
+                intersectionMap.set(section.getAttribute('id'), false);
+            });
+
+            // Target viewport range for active reading focus
+            const observerOptions = {
+                root: null,
+                rootMargin: '-12% 0px -50% 0px',
+                threshold: 0
+            };
+
+            const updateActiveLink = () => {
+                // Check if user is scrolled to the absolute bottom of the document
+                const isAtBottom = (window.innerHeight + window.scrollY) >= (document.documentElement.scrollHeight - 80);
+                
+                let activeId = null;
+
+                if (isAtBottom) {
+                    // Activate the final section immediately if at page end
+                    activeId = sections[sections.length - 1].getAttribute('id');
+                } else {
+                    // Scan intersecting sections to find the one closest to the top window sweet spot
+                    let minTop = Infinity;
+                    sections.forEach(section => {
+                        const id = section.getAttribute('id');
+                        if (intersectionMap.get(id)) {
+                            const rect = section.getBoundingClientRect();
+                            if (rect.top < minTop && rect.bottom > 0) {
+                                minTop = rect.top;
+                                activeId = id;
+                            }
+                        }
+                    });
+                }
+
+                // Fallback: If no section is intersecting, do not clear, preserve current active
+                if (activeId) {
+                    tocItems.forEach(item => {
+                        const link = item.querySelector('a');
+                        if (link && link.getAttribute('href') === `#${activeId}`) {
+                            item.classList.add('active');
+                        } else {
+                            item.classList.remove('active');
+                        }
+                    });
+                }
+            };
+
+            const observerCallback = (entries) => {
+                entries.forEach(entry => {
+                    intersectionMap.set(entry.target.getAttribute('id'), entry.isIntersecting);
+                });
+                updateActiveLink();
+            };
+
+            const observer = new IntersectionObserver(observerCallback, observerOptions);
+            sections.forEach(section => observer.observe(section));
+
+            // Sync on manual scroll (particularly useful for scroll acceleration/deceleration loops)
+            window.addEventListener('scroll', updateActiveLink);
+            
+            // Smooth scroll click handler with sticky header offset correction
+            tocItems.forEach(item => {
+                const link = item.querySelector('a');
+                if (link) {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const targetId = link.getAttribute('href');
+                        const targetSection = document.querySelector(targetId);
+                        if (targetSection) {
+                            // Calculate offset: subtract sticky header height + safety padding
+                            const headerOffset = 100;
+                            const elementPosition = targetSection.getBoundingClientRect().top;
+                            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                            
+                            window.scrollTo({
+                                top: offsetPosition,
+                                behavior: 'smooth'
+                            });
+                            
+                            // Instantly switch active class to keep navigation feel snappy
+                            tocItems.forEach(i => i.classList.remove('active'));
+                            item.classList.add('active');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -219,9 +219,9 @@
     var p = PROJECTS[idx - 1];
     if (!p) return;
 
-    // Counter
+    // Counter (Project Orbit has its own page, so carousel is 3 projects)
     var counterEl = document.getElementById('g2-counter');
-    if (counterEl) counterEl.textContent = '0' + p.id + ' / 0' + PROJECTS.length;
+    if (counterEl) counterEl.textContent = '0' + p.id + ' / 03';
 
     // Meta rows — clear and rebuild from data
     var metaPanel = document.getElementById('meta-panel');
@@ -328,12 +328,30 @@
   // ── 8. Event bindings ─────────────────────────────────────────────────
   function bindEvents() {
 
-    // G-01 · project cards → G-02
+    // G-01 · project cards → G-02 (or orbit for card 4)
     document.querySelectorAll('.project-card[data-project]').forEach(function (card) {
       card.addEventListener('click', function () {
-        goTo('project', parseInt(card.getAttribute('data-project'), 10));
+        var idx = parseInt(card.getAttribute('data-project'), 10);
+        if (idx === 4) {
+          var orbitEl = document.getElementById('screen-orbit');
+          if (orbitEl) orbitEl.scrollTop = 0;
+          goTo('orbit');
+        } else {
+          goTo('project', idx);
+        }
       });
     });
+
+    // Orbit · back buttons → home
+    var orbitBackBtn  = document.getElementById('orbit-back-btn');
+    var orbitLogoBtn  = document.getElementById('orbit-logo-btn');
+    function leaveOrbit() {
+      var orbitEl = document.getElementById('screen-orbit');
+      if (orbitEl) orbitEl.scrollTop = 0;
+      goTo('home');
+    }
+    if (orbitBackBtn) orbitBackBtn.addEventListener('click', leaveOrbit);
+    if (orbitLogoBtn) orbitLogoBtn.addEventListener('click', leaveOrbit);
 
     // G-01 · About Me → G-04
     var btnAbout = document.getElementById('btn-about');
@@ -380,13 +398,13 @@
 
     var projPrev = document.getElementById('project-prev');
     if (projPrev) projPrev.addEventListener('click', function () {
-      var n = ((state.project - 2 + PROJECTS.length) % PROJECTS.length) + 1;
+      var n = ((state.project - 2 + 3) % 3) + 1;
       goTo('project', n);
     });
 
     var projNext = document.getElementById('project-next');
     if (projNext) projNext.addEventListener('click', function () {
-      var n = (state.project % PROJECTS.length) + 1;
+      var n = (state.project % 3) + 1;
       goTo('project', n);
     });
 
