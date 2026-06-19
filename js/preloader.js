@@ -81,12 +81,22 @@
     return true;
   }
 
+  function markFinished() {
+    if (finished) return;
+    finished = true;
+    // Guarantee the overlay clears even if requestAnimationFrame is throttled
+    // (e.g. a backgrounded tab), where the eased progress loop can stall. The
+    // smooth path in tick() still handles the common foreground case first;
+    // exit() is idempotent, so this is just a safety net.
+    setTimeout(exit, 800);
+  }
+
   function maybeFinish() {
     if (finished) return;
     var elapsed = Date.now() - startTime;
     if (allPassed()) {
-      if (elapsed >= MIN_DISPLAY) finished = true;
-      else setTimeout(function () { finished = true; }, MIN_DISPLAY - elapsed);
+      if (elapsed >= MIN_DISPLAY) markFinished();
+      else setTimeout(markFinished, MIN_DISPLAY - elapsed);
     }
   }
 
@@ -161,7 +171,7 @@
   setTimeout(function () {
     GATES.forEach(function (g) { state[g] = true; });
     assetFraction = 1;
-    finished = true;
+    markFinished();
   }, MAX_WAIT);
 
   rafId = requestAnimationFrame(tick);

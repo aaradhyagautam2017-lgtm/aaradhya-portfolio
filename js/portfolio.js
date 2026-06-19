@@ -248,8 +248,9 @@
           applyOrbitFigures(sanityOrbit);
         }
 
-        // Content is in — release the sanity gate, then warm critical images
-        // (every orbit figure + each project's hero) before releasing assets.
+        // Content is in — release the sanity gate, then warm EVERY image that
+        // a screen can show (all orbit figures + every project's full carousel)
+        // so navigation is instant on first visit, not just the second.
         signalSanityDone();
         var preloadUrls = [];
         if (sanityOrbit && sanityOrbit.length) {
@@ -257,7 +258,9 @@
         }
         if (typeof PROJECTS !== 'undefined' && PROJECTS.forEach) {
           PROJECTS.forEach(function (p) {
-            if (p.images && p.images.length) preloadUrls.push(p.images[0]);
+            if (p.images && p.images.length) {
+              p.images.forEach(function (u) { if (u) preloadUrls.push(u); });
+            }
           });
         }
         preloadImages(preloadUrls).then(signalAssetsDone);
