@@ -25,7 +25,7 @@ var ww = window.innerWidth,
 
 var composer, params = {
     exposure: 1.3,
-    bloomStrength: .9,
+    bloomStrength: .3,
     bloomThreshold: 0,
     bloomRadius: 0
   };
@@ -41,8 +41,8 @@ renderer.setSize(ww, wh);
 
 //Create an empty scene
 var scene = new THREE.Scene();
-scene.fog = new THREE.Fog(0x000308, 0, 80);
-scene.background = new THREE.Color(0x000308);
+scene.fog = new THREE.FogExp2(0x000000, 0.030);
+scene.background = new THREE.Color(0x000000);
 
 var clock = new THREE.Clock();
 
@@ -105,13 +105,29 @@ path.tension = .5;
 //Create a new geometry with a different radius
 var geometry = new THREE.TubeGeometry( path, 300, 4, 32, false );
 
-var texture = new THREE.TextureLoader().load( 'assets/images/heic1424a.jpg', function ( texture ) {
-
-    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-    texture.offset.set( 0, 0.3 );
-    texture.repeat.set( 2, 1 );
-
-} );
+var texture = new THREE.Texture();
+texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+texture.offset.set(0, 0.3);
+texture.repeat.set(2, 1);
+texture.generateMipmaps = true;
+texture.minFilter = THREE.LinearMipMapLinearFilter;
+texture.magFilter = THREE.LinearFilter;
+(function () {
+    var img = new Image();
+    img.onload = function () {
+        // Redraw into a power-of-two canvas. WebGL forbids RepeatWrapping/mipmaps on
+        // non-power-of-two textures and samples them as black; source PNG is NPOT.
+        var cvs = document.createElement('canvas');
+        cvs.width = 2048; cvs.height = 1024;
+        var ctx = cvs.getContext('2d');
+        ctx.filter = 'brightness(0.9) saturate(1.0)';
+        ctx.drawImage(img, 0, 0, 2048, 1024);
+        texture.image = cvs;
+        texture.needsUpdate = true;
+    };
+    img.onerror = function () { console.error('[wormhole] texture load failed: assets/images/wormhole-texture.png'); };
+    img.src = window.WORMHOLE_TEXTURE_DATAURL || 'assets/images/wormhole-texture.png';
+}());
 
 
 // Procedural waveform bump texture replacing 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/68819/waveform-bump3.jpg'
@@ -143,15 +159,9 @@ var mapHeight = (function() {
     return tex;
 }());
 
-var material = new THREE.MeshPhongMaterial({
+var material = new THREE.MeshBasicMaterial({
   side:THREE.BackSide,
   map: texture,
-  shininess: 15,
-  bumpMap: mapHeight,
-  bumpScale: -.03,
-  specular: 0x051520,
-  emissive: 0x050f20,       // subtle glow so the nebula texture doesn't look flat
-  emissiveIntensity: 0.25
 });
 
 //Create a mesh
@@ -168,8 +178,9 @@ var geo = new THREE.EdgesGeometry( geometry );
 //THREE.EdgesGeometry( geometry );
 
 var mat = new THREE.LineBasicMaterial( {
+  color: 0xc8dee9,
   linewidth: 2,
-  opacity: .08,
+  opacity: .34,
   transparent: 1
 } );
 
@@ -180,7 +191,7 @@ scene.add( wireframe );
 
 
 //Create a point light in our scene
-var light = new THREE.PointLight(0xffffff, .35, 4,0);
+var light = new THREE.PointLight(0xffffff, .35, 8,0);
 light.castShadow = true;
 scene.add(light);
 
@@ -193,10 +204,10 @@ scene.add(light);
 var nebulaMeshes = [];
 (function() {
   var wispDefs = [
-    { x: -25, y:  18, z:  -30, size: 60, rz:  0.3, c0: 'rgba(40,80,160,0.15)',  c1: 'rgba(20,50,120,0.07)'  },
-    { x:  35, y: -12, z:  -50, size: 80, rz: -0.4, c0: 'rgba(40,80,160,0.15)',  c1: 'rgba(20,50,120,0.07)'  },
-    { x:  -8, y:  25, z:  -40, size: 70, rz:  0.6, c0: 'rgba(40,80,160,0.15)',  c1: 'rgba(20,50,120,0.07)'  },
-    { x:  20, y:  10, z:  -35, size: 55, rz: -0.2, c0: 'rgba(60,40,140,0.12)',  c1: 'rgba(30,20,100,0.06)'  }
+    { x: -25, y:  18, z:  -30, size: 60, rz:  0.3, c0: 'rgba(150, 152, 158, 0.15)',  c1: 'rgba(20, 20, 22, 0.07)'  },
+    { x:  35, y: -12, z:  -50, size: 80, rz: -0.4, c0: 'rgba(150, 152, 158, 0.15)',  c1: 'rgba(20, 20, 22, 0.07)'  },
+    { x:  -8, y:  25, z:  -40, size: 70, rz:  0.6, c0: 'rgba(150, 152, 158, 0.15)',  c1: 'rgba(20, 20, 22, 0.07)'  },
+    { x:  20, y:  10, z:  -35, size: 55, rz: -0.2, c0: 'rgba(150, 152, 158, 0.12)',  c1: 'rgba(20, 20, 22, 0.06)'  }
   ];
   wispDefs.forEach(function(w) {
     var cvs = document.createElement('canvas');
@@ -241,7 +252,7 @@ var cluster1, cluster2;
       ));
     }
     return new THREE.Points(geo, new THREE.PointsMaterial({
-      color: 0x8ab4f8,
+      color: 0x9fc3d8,
       size: 0.12,
       transparent: true,
       opacity: 0.55,
@@ -264,8 +275,8 @@ var orbs = [];
   var ctx = cvs.getContext('2d');
   var g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
   g.addColorStop(0,    'rgba(255,255,255,1.0)');
-  g.addColorStop(0.15, 'rgba(160,200,255,0.8)');
-  g.addColorStop(0.45, 'rgba(80,140,255,0.3)');
+  g.addColorStop(0.15, 'rgba(200, 216, 229, 0.8)');
+  g.addColorStop(0.45, 'rgba(159, 195, 216, 0.3)');
   g.addColorStop(1,    'rgba(0,0,0,0)');
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, 128, 128);
