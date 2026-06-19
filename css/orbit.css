@@ -327,6 +327,12 @@
     border-color: var(--color-border-hover);
 }
 
+#screen-orbit .doc-asset-placeholder.has-image {
+    border: none;
+    background: transparent;
+    overflow: hidden;
+}
+
 #screen-orbit .doc-asset-text {
     font-family: var(--font-mono);
     font-size: var(--type-meta);

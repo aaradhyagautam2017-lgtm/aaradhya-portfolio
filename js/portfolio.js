@@ -132,20 +132,50 @@
     'rgba(40,120,80,0.40)',
   ];
 
+  function applyOrbitFigures(figures) {
+    var orbitEl = document.getElementById('screen-orbit');
+    if (!orbitEl) return;
+    var map = {};
+    figures.forEach(function (f) {
+      if (f.figureId && f.url) map[f.figureId] = f;
+    });
+    orbitEl.querySelectorAll('[data-figure-id]').forEach(function (placeholder) {
+      var id  = placeholder.getAttribute('data-figure-id');
+      var fig = map[id];
+      if (!fig) return;
+      placeholder.innerHTML = '';
+      placeholder.classList.add('has-image');
+      var img = document.createElement('img');
+      img.src = fig.url;
+      img.alt = 'Figure ' + id;
+      img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;border-radius:4px;';
+      placeholder.appendChild(img);
+      if (fig.caption) {
+        var caption = placeholder.nextElementSibling;
+        if (caption && caption.classList.contains('doc-asset-caption')) {
+          caption.textContent = fig.caption;
+        }
+      }
+    });
+  }
+
   function fetchSanityData() {
     var base = 'https://svn8kxqj.apicdn.sanity.io/v2021-10-21/data/query/production?query=';
     var projectQuery = encodeURIComponent('*[_type == "project"] | order(order asc) {title, order, tagline, role, industry, platform, duration, year, overview, behance, nda, "images": images[].asset->url}');
-    var chatQuery = encodeURIComponent('*[_type == "chatbotResponse"] {keyword, response}');
+    var chatQuery    = encodeURIComponent('*[_type == "chatbotResponse"] {keyword, response}');
     var profileQuery = encodeURIComponent('*[_type == "profile"][0] {statusText, progressValue}');
+    var orbitQuery   = encodeURIComponent('*[_type == "orbitCaseStudy"][0] { "figures": figures[] { figureId, "url": image.asset->url, caption } }');
     try {
       Promise.all([
         fetch(base + projectQuery).then(function (r) { return r.json(); }),
         fetch(base + chatQuery).then(function (r) { return r.json(); }),
         fetch(base + profileQuery).then(function (r) { return r.json(); }),
+        fetch(base + orbitQuery).then(function (r) { return r.json(); }),
       ]).then(function (results) {
         var sanityProjects = results[0].result;
         var sanityChat     = results[1].result;
         var sanityProfile  = results[2].result;
+        var sanityOrbit    = results[3].result;
         if (sanityProjects && sanityProjects.length) {
           PROJECTS = sanityProjects.map(function (p) {
             var type = [p.industry, p.platform].filter(Boolean).join(' / ');
@@ -179,6 +209,9 @@
           if (statusEl && sanityProfile.statusText)   statusEl.textContent = sanityProfile.statusText;
           if (valEl    && sanityProfile.progressValue != null) valEl.textContent  = sanityProfile.progressValue + '%';
           if (fillEl   && sanityProfile.progressValue != null) fillEl.style.width = sanityProfile.progressValue + '%';
+        }
+        if (sanityOrbit && sanityOrbit.figures && sanityOrbit.figures.length) {
+          applyOrbitFigures(sanityOrbit.figures);
         }
       }).catch(function () {});
     } catch (e) {}
