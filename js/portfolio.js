@@ -257,7 +257,7 @@
 
   function startCarouselTimer() {
     stopCarouselTimer();
-    carouselTimer = setInterval(nextSlide, 4000);
+    carouselTimer = setInterval(nextSlide, 5000);
   }
 
   function populateProject(idx) {
@@ -308,7 +308,7 @@
           img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
           slide.appendChild(img);
         }
-        slide.style.display = (i === 0) ? 'block' : 'none';
+        slide.style.transform = (i === 0) ? 'translateX(0)' : 'translateX(100%)';
         carousel.appendChild(slide);
       });
       if (imgs.length > 1) startCarouselTimer();
@@ -317,18 +317,30 @@
 
   function prevSlide() {
     var slides = document.querySelectorAll('.hero-carousel .carousel-slide');
-    if (!slides.length) return;
-    slides[carouselIdx].style.display = 'none';
+    if (slides.length <= 1) return;
+    var outgoing = slides[carouselIdx];
     carouselIdx = (carouselIdx - 1 + slides.length) % slides.length;
-    slides[carouselIdx].style.display = 'block';
+    var incoming = slides[carouselIdx];
+    incoming.style.transition = 'none';
+    incoming.style.transform  = 'translateX(-100%)';
+    incoming.offsetHeight;
+    incoming.style.transition = '';
+    outgoing.style.transform  = 'translateX(100%)';
+    incoming.style.transform  = 'translateX(0)';
   }
 
   function nextSlide() {
     var slides = document.querySelectorAll('.hero-carousel .carousel-slide');
-    if (!slides.length) return;
-    slides[carouselIdx].style.display = 'none';
+    if (slides.length <= 1) return;
+    var outgoing = slides[carouselIdx];
     carouselIdx = (carouselIdx + 1) % slides.length;
-    slides[carouselIdx].style.display = 'block';
+    var incoming = slides[carouselIdx];
+    incoming.style.transition = 'none';
+    incoming.style.transform  = 'translateX(100%)';
+    incoming.offsetHeight;
+    incoming.style.transition = '';
+    outgoing.style.transform  = 'translateX(-100%)';
+    incoming.style.transform  = 'translateX(0)';
   }
 
   // ── 7. Chat helpers ────────────────────────────────────────────────────
