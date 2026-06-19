@@ -227,6 +227,8 @@
     var next = document.getElementById('screen-' + screenName);
     if (!next) return;
 
+    if (state.screen === 'project' && screenName !== 'project') stopCarouselTimer();
+
     if (prev && prev !== next) {
       prev.style.opacity       = '0';
       prev.style.pointerEvents = 'none';
@@ -246,7 +248,17 @@
   }
 
   // ── 6. Populate G-02 ──────────────────────────────────────────────────
-  var carouselIdx = 0;
+  var carouselIdx   = 0;
+  var carouselTimer = null;
+
+  function stopCarouselTimer() {
+    if (carouselTimer) { clearInterval(carouselTimer); carouselTimer = null; }
+  }
+
+  function startCarouselTimer() {
+    stopCarouselTimer();
+    carouselTimer = setInterval(nextSlide, 4000);
+  }
 
   function populateProject(idx) {
     var p = PROJECTS[idx - 1];
@@ -299,6 +311,7 @@
         slide.style.display = (i === 0) ? 'block' : 'none';
         carousel.appendChild(slide);
       });
+      if (imgs.length > 1) startCarouselTimer();
     }
   }
 
