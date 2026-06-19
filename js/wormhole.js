@@ -31,8 +31,12 @@ var composer, params = {
   };
 
 //Create a WebGL renderer
+// NOTE: must target the wormhole canvas explicitly. A bare querySelector("canvas")
+// would grab whatever canvas comes first in the DOM — and the preloader adds its own
+// particle <canvas> ahead of this one, which already holds a 2D context (so WebGL
+// would fail to initialize on it).
 var renderer = new THREE.WebGLRenderer({
-  canvas: document.querySelector("canvas"),
+  canvas: document.querySelector("canvas.experience"),
   antialias: true,
   shadowMapEnabled: true,
   shadowMapType: THREE.PCFSoftShadowMap
@@ -378,11 +382,17 @@ function render(){
   //renderer.render(scene, camera);
   composer.render();
 
+  // Signal the preloader once the tunnel has painted its first frame.
+  if (!window.__wormholeFirstFrame) {
+    window.__wormholeFirstFrame = true;
+    if (window.Preloader) window.Preloader.pass('wormhole');
+  }
+
   requestAnimationFrame(render);
 }
 requestAnimationFrame(render);
 
-$('canvas').click(function(){
+$('canvas.experience').click(function(){
   console.clear();
   markers.push(p1);
   console.log(JSON.stringify(markers));
@@ -521,7 +531,6 @@ document.addEventListener('mousemove', function(evt) {
   function getProgress() {
     var scrollTop = window.scrollY;
     var totalHeight = document.querySelector('.scrollTarget').offsetHeight - window.innerHeight;
-    console.log('scrollTop:', scrollTop, 'totalHeight:', totalHeight);
     return Math.min(scrollTop / totalHeight, 1);
   }
 
@@ -576,7 +585,6 @@ document.addEventListener('mousemove', function(evt) {
     var scrollTop = window.scrollY;
     var totalHeight = document.querySelector('.scrollTarget').offsetHeight
                       - window.innerHeight;
-    console.log('scrollTop:', scrollTop, 'totalHeight:', totalHeight);
     return Math.min(scrollTop / totalHeight, 1);
   }
 

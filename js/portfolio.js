@@ -159,12 +159,46 @@
     });
   }
 
+  // Warm the browser cache for a set of image URLs so they appear instantly
+  // when the user navigates. Resolves once all settle or after a safety cap,
+  // reporting progress to the preloader along the way.
+  function preloadImages(urls) {
+    return new Promise(function (resolve) {
+      var list = (urls || []).filter(Boolean);
+      var total = list.length;
+      if (!total) { resolve(); return; }
+      var loaded  = 0;
+      var settled = false;
+      function finish() { if (!settled) { settled = true; resolve(); } }
+      function bump() {
+        loaded++;
+        if (window.Preloader) window.Preloader.setAssetProgress(loaded / total);
+        if (loaded >= total) finish();
+      }
+      // A single broken/slow image must not stall the reveal.
+      setTimeout(finish, 6000);
+      list.forEach(function (url) {
+        var img = new Image();
+        img.onload = bump;
+        img.onerror = bump;
+        img.src = url;
+      });
+    });
+  }
+
+  function signalSanityDone() {
+    if (window.Preloader) window.Preloader.pass('sanity');
+  }
+  function signalAssetsDone() {
+    if (window.Preloader) window.Preloader.pass('assets');
+  }
+
   function fetchSanityData() {
     var base = 'https://svn8kxqj.apicdn.sanity.io/v2021-10-21/data/query/production?query=';
     var projectQuery = encodeURIComponent('*[_type == "project"] | order(order asc) {title, order, tagline, role, industry, platform, duration, year, overview, behance, nda, "images": images[].asset->url}');
     var chatQuery    = encodeURIComponent('*[_type == "chatbotResponse"] {keyword, response}');
     var profileQuery = encodeURIComponent('*[_type == "profile"][0] {statusText, progressValue}');
-    var orbitQuery   = encodeURIComponent('*[_type == "orbitCaseStudy"][0] { "figures": figures[] { figureId, "url": image.asset->url, caption } }');
+    var orbitQuery   = encodeURIComponent('*[_type == "orbitCaseStudy"].figures[]{ figureId, "url": image.asset->url, caption }');
     try {
       Promise.all([
         fetch(base + projectQuery).then(function (r) { return r.json(); }),
@@ -210,11 +244,32 @@
           if (valEl    && sanityProfile.progressValue != null) valEl.textContent  = sanityProfile.progressValue + '%';
           if (fillEl   && sanityProfile.progressValue != null) fillEl.style.width = sanityProfile.progressValue + '%';
         }
-        if (sanityOrbit && sanityOrbit.figures && sanityOrbit.figures.length) {
-          applyOrbitFigures(sanityOrbit.figures);
+        if (sanityOrbit && sanityOrbit.length) {
+          applyOrbitFigures(sanityOrbit);
         }
-      }).catch(function () {});
-    } catch (e) {}
+
+        // Content is in — release the sanity gate, then warm critical images
+        // (every orbit figure + each project's hero) before releasing assets.
+        signalSanityDone();
+        var preloadUrls = [];
+        if (sanityOrbit && sanityOrbit.length) {
+          sanityOrbit.forEach(function (f) { if (f && f.url) preloadUrls.push(f.url); });
+        }
+        if (typeof PROJECTS !== 'undefined' && PROJECTS.forEach) {
+          PROJECTS.forEach(function (p) {
+            if (p.images && p.images.length) preloadUrls.push(p.images[0]);
+          });
+        }
+        preloadImages(preloadUrls).then(signalAssetsDone);
+      }).catch(function () {
+        // Network/Sanity failure must not strand the preloader.
+        signalSanityDone();
+        signalAssetsDone();
+      });
+    } catch (e) {
+      signalSanityDone();
+      signalAssetsDone();
+    }
   }
 
 

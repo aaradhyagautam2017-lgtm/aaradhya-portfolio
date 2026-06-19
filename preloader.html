@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Orbit — System Initialization</title>
+    <meta name="description" content="Mission initialization screen for Project Orbit. Preparing system telemetry and orbital alignment.">
+    <link rel="stylesheet" href="typography.css">
+    <link rel="stylesheet" href="tech.css">
+    <style>
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           CSS OVERRIDES & CORE RENDERING
+           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            background-color: #030303;
+            overflow: hidden;
+            font-family: var(--font-primary), sans-serif;
+            color: var(--text-primary);
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           CINEMATIC BACKGROUND SYSTEM
+           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .cinematic-bg {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                radial-gradient(circle at center, rgba(3, 3, 3, 0.2) 0%, rgba(3, 3, 3, 0.85) 75%, #030303 100%),
+                url('./assets/preloader image.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: 1;
+            transform: scale(1.02); /* slight scale to avoid edge border gaps */
+            transition: transform 1.5s ease-out, filter 1.5s ease-out;
+        }
+
+        /* Overlay grids to match instrumentation HUD */
+        .hud-overlay-system {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .hud-grid {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+            background-size: 60px 60px;
+            background-position: center;
+            opacity: 0.65;
+        }
+
+        .hud-scanlines {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                rgba(255, 255, 255, 0) 50%,
+                rgba(0, 0, 0, 0.2) 50%
+            );
+            background-size: 100% 4px;
+            opacity: 0.4;
+        }
+
+        #particle-canvas {
+            position: absolute;
+            inset: 0;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           LAYOUT ARCHITECTURE
+           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .preloader-wrapper {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10vh 2rem;
+            box-sizing: border-box;
+            opacity: 0;
+            transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Ambient breathing animation */
+        .breathing-glow {
+            animation: breathe 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes breathe {
+            0% {
+                opacity: 0.92;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           HUD FRAME COMPONENT (CRISP CORNER BRACKETS)
+           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .hud-frame {
+            position: relative;
+            padding: var(--space-20) var(--space-40);
+            background: transparent !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            border: none !important;
+        }
+
+        .hud-frame .corner {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.40);
+            transition: border-color 0.4s ease;
+        }
+
+        .hud-frame .corner.tl { top: 0; left: 0; border-right: none; border-bottom: none; }
+        .hud-frame .corner.tr { top: 0; right: 0; border-left: none; border-bottom: none; }
+        .hud-frame .corner.bl { bottom: 0; left: 0; border-right: none; border-top: none; }
+        .hud-frame .corner.br { bottom: 0; right: 0; border-left: none; border-top: none; }
+
+        .hud-frame:hover .corner {
+            border-color: rgba(255, 255, 255, 0.75);
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           ZONE 1: PROJECT TITLE
+           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .title-zone {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .project-title {
+            font-family: var(--font-primary);
+            font-size: clamp(2.2rem, 6vw, 3.6rem);
+            font-weight: var(--weight-medium);
+            letter-spacing: 0.28em;
+            color: var(--text-primary);
+            margin: 0;
+            line-height: 1.1;
+            padding-left: 0.28em; /* offsets tracking for perfect centering */
+            text-transform: uppercase;
+        }
+
+        .title-subtitle {
+            font-family: var(--font-mono);
+            font-size: var(--type-hud);
+            color: var(--text-tertiary);
+            letter-spacing: 0.18em;
+            margin-top: var(--space-8);
+            text-transform: uppercase;
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           BLACK HOLE COMPOSITION SPACER
+           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .black-hole-spacer {
+            flex-grow: 1;
+            min-height: 200px;
+            max-height: 320px;
+            width: 100%;
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           ZONE 2: LOADING MODULE
+           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .loading-zone {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .loading-label {
+            font-family: var(--font-mono);
+            font-size: var(--type-hud);
+            color: var(--text-secondary);
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            margin-bottom: var(--space-4);
+            opacity: 0.85;
+        }
+
+        .percentage-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-12);
+            margin: var(--space-8) 0;
+        }
+
+        .bracket-hud {
+            font-family: var(--font-mono);
+            font-size: var(--type-h3);
+            color: rgba(255, 255, 255, 0.2);
+            font-weight: 300;
+            user-select: none;
+            transition: color 0.3s ease;
+        }
+
+        .percentage-value {
+            font-family: var(--font-mono);
+            font-size: var(--type-h2);
+            font-weight: var(--weight-medium);
+            color: var(--text-primary);
+            letter-spacing: 0.08em;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        /* Progress Bar (sleek thin hud-line style) */
+        .progress-bar-track {
+            width: 220px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.05);
+            position: relative;
+            margin: var(--space-8) auto var(--space-16);
+        }
+        
+        .progress-bar-track::before, .progress-bar-track::after {
+            content: '';
+            position: absolute;
+            top: -3px;
+            width: 1px;
+            height: 8px;
+        }
+        .progress-bar-track::before {
+            left: 0;
+            border-left: 1px solid rgba(255, 255, 255, 0.25);
+        }
+        .progress-bar-track::after {
+            right: 0;
+            border-right: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: rgba(255, 255, 255, 0.85);
+            position: relative;
+            box-shadow: 0 0 6px rgba(255, 255, 255, 0.3);
+        }
+
+        /* Leading edge indicator */
+        .progress-bar-fill::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: -2px;
+            width: 2px;
+            height: 6px;
+            background: #ffffff;
+            box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+        }
+
+        .telemetry-log {
+            font-family: var(--font-mono);
+            font-size: var(--type-micro);
+            color: var(--text-tertiary);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            min-height: 16px;
+            opacity: 0.65;
+            transition: color 0.3s ease;
+        }
+
+        .project-briefing-note {
+            font-family: var(--font-primary);
+            font-size: 14px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.55);
+            line-height: 1.6;
+            text-align: center;
+            max-width: 540px;
+            margin-top: 48px;
+            letter-spacing: 0.015em;
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           EXIT ANIMATION STYLES
+           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .preloader-wrapper.exit-active {
+            opacity: 0 !important;
+            animation: none !important; /* Stop breathing animation */
+            transition: opacity 1000ms cubic-bezier(0.25, 1, 0.5, 1) !important;
+        }
+
+        #title-frame {
+            transform: translateY(0);
+            opacity: 1;
+            transition: opacity 1000ms cubic-bezier(0.25, 1, 0.5, 1), transform 1000ms cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .preloader-wrapper.exit-active #title-frame {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+
+        .preloader-wrapper.exit-active #loading-module {
+            opacity: 0;
+            transition: opacity 800ms cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .cinematic-bg {
+            transition: transform 1.5s ease-out, filter 1.5s ease-out, opacity 1000ms cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .cinematic-bg.exit-active {
+            opacity: 0;
+        }
+
+        #particle-canvas {
+            transition: opacity 1000ms cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        #particle-canvas.exit-active {
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Cinematic background & overlays -->
+    <div id="cinematic-bg" class="cinematic-bg"></div>
+    <div class="hud-overlay-system">
+        <div class="hud-grid"></div>
+        <div class="hud-scanlines"></div>
+    </div>
+
+    <!-- Cosmic particle canvas -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Main Preloader Stack -->
+    <div id="preloader-wrapper" class="preloader-wrapper breathing-glow">
+        
+        <!-- ZONE 1: PROJECT TITLE -->
+        <header class="title-zone">
+            <div class="hud-frame" id="title-frame">
+                <div class="corner tl"></div>
+                <div class="corner tr"></div>
+                <div class="corner bl"></div>
+                <div class="corner br"></div>
+                <h1 class="project-title text-title" id="title-text">PROJECT ORBIT</h1>
+            </div>
+        </header>
+
+        <!-- SPACER (Allows black hole background to remain visually prominent) -->
+        <div class="black-hole-spacer"></div>
+
+        <!-- ZONE 2: LOADING MODULE -->
+        <main class="loading-zone" id="loading-module">
+            <h2 class="loading-label text-hud">LOADING</h2>
+            
+            <div class="percentage-container">
+                <span class="bracket-hud">[</span>
+                <span id="percentage-value" class="percentage-value">000%</span>
+                <span class="bracket-hud">]</span>
+            </div>
+
+            <div class="progress-bar-track">
+                <div id="progress-fill" class="progress-bar-fill"></div>
+            </div>
+
+            <div class="telemetry-log text-hud" id="telemetry-log">
+                INITIALIZING COLD LAUNCH PROTOCOLS...
+            </div>
+
+            <p class="project-briefing-note">
+                This project explores how products can be researched, designed, built, and shipped through collaborative human–AI workflows. Every artifact, decision, and outcome documented here emerged from an experiment in AI-native product creation.
+            </p>
+        </main>
+
+    </div>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       JAVASCRIPT DYNAMICS
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <script>
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 1. PARTICLES & DRIFT SIMULATION
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let asteroids = [];
+
+        class StarParticle {
+            constructor(w, h) {
+                this.w = w;
+                this.h = h;
+                this.reset();
+                this.x = Math.random() * w;
+                this.y = Math.random() * h;
+            }
+            reset() {
+                this.x = Math.random() * this.w;
+                this.y = this.h + 10;
+                this.size = Math.random() * 1.4 + 0.3; // micro space dust
+                this.speedY = -(Math.random() * 0.12 + 0.04); // slow upward drift
+                this.speedX = (Math.random() - 0.5) * 0.03; // micro horizontal sway
+                this.baseAlpha = Math.random() * 0.35 + 0.1;
+                this.alpha = this.baseAlpha;
+                this.pulseSeed = Math.random() * 100;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                
+                // slow ambient twinkling
+                this.pulseSeed += 0.015;
+                this.alpha = this.baseAlpha + Math.sin(this.pulseSeed) * 0.08;
+
+                if (this.y < -10 || this.x < -10 || this.x > this.w + 10) {
+                    this.reset();
+                    this.y = this.h + Math.random() * 10;
+                }
+            }
+            draw(c) {
+                c.beginPath();
+                c.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                c.fillStyle = `rgba(255, 255, 255, ${Math.max(0.05, Math.min(1, this.alpha))})`;
+                c.fill();
+            }
+        }
+
+        class AsteroidDrift {
+            constructor(w, h) {
+                this.w = w;
+                this.h = h;
+                this.reset();
+                this.x = Math.random() * w;
+                this.y = Math.random() * h;
+            }
+            reset() {
+                this.x = Math.random() * this.w;
+                this.y = this.h + 40;
+                this.size = Math.random() * 6 + 2; // larger blurred entities
+                this.speedY = -(Math.random() * 0.06 + 0.02); // extremely slow
+                this.speedX = -(Math.random() * 0.02 + 0.01); // minor leftward drift
+                this.alpha = Math.random() * 0.06 + 0.02; // extremely faint parallax dust
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.y < -40 || this.x < -40 || this.x > this.w + 40) {
+                    this.reset();
+                    this.y = this.h + Math.random() * 30;
+                }
+            }
+            draw(c) {
+                c.beginPath();
+                c.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                c.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
+                c.fill();
+            }
+        }
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            // Re-initialize lists on large size changes
+            particles = [];
+            asteroids = [];
+            const particleCount = Math.min(50, Math.floor(window.innerWidth / 30));
+            const asteroidCount = Math.min(6, Math.floor(window.innerWidth / 200));
+
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new StarParticle(canvas.width, canvas.height));
+            }
+            for (let i = 0; i < asteroidCount; i++) {
+                asteroids.push(new AsteroidDrift(canvas.width, canvas.height));
+            }
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function drawLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (const p of particles) {
+                p.update();
+                p.draw(ctx);
+            }
+            for (const a of asteroids) {
+                a.update();
+                a.draw(ctx);
+            }
+            requestAnimationFrame(drawLoop);
+        }
+        drawLoop();
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 2. LOADING STATE & TELEMETRY PROGRESS
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        const telemetrySteps = [
+            { threshold: 0, text: "INITIALIZING EXPEDITION CONDUIT..." },
+            { threshold: 15, text: "CALIBRATING ORBITAL TELEMETRY..." },
+            { threshold: 35, text: "SYNCHRONIZING GRAVITATIONAL SENSORS..." },
+            { threshold: 52, text: "SCANNING ACCRETION DISK SPECTRUM..." },
+            { threshold: 70, text: "CALCULATING ASTEROID FIELD VECTORS..." },
+            { threshold: 85, text: "STABILIZING EVENT HORIZON BRIDGE..." },
+            { threshold: 95, text: "VERIFYING INTRUSION VECTORS..." },
+            { threshold: 100, text: "EXPEDITION READY // SYSTEM ONLINE" }
+        ];
+
+        let currentPercent = 0;
+        let animationFrameId = null;
+        let startTimestamp = null;
+        const duration = 6500; // 6.5s load duration
+
+        const percentageNum = document.getElementById('percentage-value');
+        const progressFill = document.getElementById('progress-fill');
+        const telemetryLog = document.getElementById('telemetry-log');
+        const wrapper = document.getElementById('preloader-wrapper');
+        const bg = document.getElementById('cinematic-bg');
+
+        // Reveal loader wrapper
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                wrapper.style.opacity = '1';
+                startTimestamp = performance.now();
+                animateLoader(startTimestamp);
+            }, 300);
+        });
+
+        function getTelemetryText(percent) {
+            let currentStep = telemetrySteps[0];
+            for (const step of telemetrySteps) {
+                if (percent >= step.threshold) {
+                    currentStep = step;
+                }
+            }
+            return currentStep.text;
+        }
+
+        // Stepped/Plateaued ease function
+        function getEasedProgress(linearProgress) {
+            // Smooth ease in-out
+            let p = 3 * linearProgress * linearProgress - 2 * linearProgress * linearProgress * linearProgress;
+            
+            // Subtle plateaus to simulate telemetry processing checkpoints
+            let plateau = 0;
+            if (linearProgress > 0.20 && linearProgress < 0.35) {
+                plateau = Math.sin((linearProgress - 0.20) * (Math.PI / 0.15)) * 0.025;
+            } else if (linearProgress > 0.60 && linearProgress < 0.75) {
+                plateau = Math.sin((linearProgress - 0.60) * (Math.PI / 0.15)) * 0.035;
+            }
+            
+            return Math.max(0, Math.min(1, p - plateau));
+        }
+
+        function animateLoader(now) {
+            if (!startTimestamp) startTimestamp = now;
+            const elapsed = now - startTimestamp;
+            const linearProgress = Math.min(elapsed / duration, 1);
+            
+            const easedProgress = getEasedProgress(linearProgress);
+            const currentPercent = Math.floor(easedProgress * 100);
+
+            // Output zero-padded string
+            percentageNum.textContent = currentPercent.toString().padStart(3, '0') + '%';
+            progressFill.style.width = currentPercent + '%';
+            telemetryLog.textContent = getTelemetryText(currentPercent);
+
+            if (linearProgress < 1) {
+                animationFrameId = requestAnimationFrame(animateLoader);
+            } else {
+                handleLoadingComplete();
+            }
+        }
+
+        function handleLoadingComplete() {
+            percentageNum.textContent = '100%';
+            progressFill.style.width = '100%';
+            telemetryLog.textContent = "EXPEDITION READY // SYSTEM ONLINE";
+            telemetryLog.style.color = "rgba(255, 255, 255, 0.9)";
+            
+            document.querySelectorAll('.bracket-hud').forEach(el => {
+                el.style.color = "rgba(255, 255, 255, 0.65)";
+            });
+
+            // Pause for 600ms once complete, then trigger exit animation
+            setTimeout(() => {
+                triggerExitAnimation();
+            }, 600);
+        }
+
+        function triggerExitAnimation() {
+            // Trigger CSS exit transitions
+            wrapper.classList.add('exit-active');
+            bg.classList.add('exit-active');
+            canvas.classList.add('exit-active');
+            
+            // Dispatch custom event for parent application integration
+            setTimeout(() => {
+                const event = new CustomEvent('preloaderComplete');
+                window.dispatchEvent(event);
+                
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ type: 'PRELOADER_COMPLETE' }, '*');
+                }
+                console.log("Preloader exit sequence complete.");
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
