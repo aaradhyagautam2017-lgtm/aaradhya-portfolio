@@ -429,6 +429,20 @@
     }
   }
 
+  var chatMsgCount = 0;
+  var CHAT_LIMIT_TEXT = "You've reached the chat limit for this session — thanks for chatting! For anything else, reach out directly at aaradhyagautam2017@gmail.com."; // PLACEHOLDER TEXT - confirm final wording
+
+  function lockChatInputs() {
+    ['home-input', 'chat-input', 'chat-active-input'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) { el.disabled = true; el.placeholder = 'Chat limit reached'; }
+    });
+    ['home-send', 'chat-send', 'chat-active-send'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.disabled = true;
+    });
+  }
+
   function sendHomeChat(text) {
     if (!text.trim()) return;
     var msg = text.trim();
@@ -437,6 +451,12 @@
       var conv = document.getElementById('g3-conversation');
       if (!conv) return;
       appendBubble(conv, msg, 'user');
+      chatMsgCount++;
+      if (chatMsgCount > 10) {
+        appendBubble(conv, CHAT_LIMIT_TEXT, 'bot');
+        lockChatInputs();
+        return;
+      }
       var thinking = appendBubble(conv, '…', 'bot');
       fetchAIReply(msg).then(function (reply) {
         thinking.textContent = reply !== null ? reply : getReply(msg);
@@ -451,6 +471,12 @@
     var conv = document.getElementById('chat-conversation');
     if (!conv) return;
     appendBubble(conv, msg, 'user');
+    chatMsgCount++;
+    if (chatMsgCount > 10) {
+      appendBubble(conv, CHAT_LIMIT_TEXT, 'bot');
+      lockChatInputs();
+      return;
+    }
     var thinking = appendBubble(conv, '…', 'bot');
     fetchAIReply(msg).then(function (reply) {
       thinking.textContent = reply !== null ? reply : getReply(msg);
