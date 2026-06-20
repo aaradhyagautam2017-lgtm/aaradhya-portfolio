@@ -439,6 +439,28 @@
     }
   }
 
+  function encryptedReveal(el, text) {
+    var CHARS     = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]';
+    var FLIP_MS   = 30;
+    var REVEAL_MS = 40;
+    var len = text.length, revealed = 0;
+    function rand() { return CHARS[Math.floor(Math.random() * CHARS.length)]; }
+    function render() {
+      var out = '';
+      for (var i = 0; i < len; i++) out += i < revealed ? text[i] : rand();
+      el.textContent = out;
+    }
+    var flipTimer   = setInterval(render, FLIP_MS);
+    var revealTimer = setInterval(function () {
+      if (++revealed >= len) {
+        clearInterval(flipTimer);
+        clearInterval(revealTimer);
+        el.textContent = text;
+      }
+    }, REVEAL_MS);
+    render();
+  }
+
   function sendHomeChat(text) {
     if (!text.trim()) return;
     var msg = text.trim();
@@ -449,7 +471,7 @@
       appendBubble(conv, msg, 'user');
       var thinking = appendBubble(conv, '…', 'bot');
       fetchAIReply(msg).then(function (reply) {
-        thinking.textContent = reply !== null ? reply : getReply(msg);
+        encryptedReveal(thinking, reply !== null ? reply : getReply(msg));
         conv.scrollTop = conv.scrollHeight;
       });
     }, 120);
@@ -463,7 +485,7 @@
     appendBubble(conv, msg, 'user');
     var thinking = appendBubble(conv, '…', 'bot');
     fetchAIReply(msg).then(function (reply) {
-      thinking.textContent = reply !== null ? reply : getReply(msg);
+      encryptedReveal(thinking, reply !== null ? reply : getReply(msg));
       conv.scrollTop = conv.scrollHeight;
     });
   }
