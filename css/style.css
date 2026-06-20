@@ -2239,7 +2239,7 @@ body{
 /* Conversation Area */
 #screen-home #g3-container .chat-conversation {
     flex: 1;
-    padding: 24px 32px 115px 32px;
+    padding: 24px 32px 68px 32px;
     display: flex;
     flex-direction: column;
     gap: 28px;
