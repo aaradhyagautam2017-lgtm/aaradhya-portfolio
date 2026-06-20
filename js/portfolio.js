@@ -419,6 +419,24 @@
     b.textContent = text;
     container.appendChild(b);
     container.scrollTop = container.scrollHeight;
+    return b;
+  }
+
+  async function fetchAIReply(message) {
+    try {
+      var res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: message }),
+      });
+      if (!res.ok) return null;
+      var data = await res.json();
+      return (data && typeof data.reply === 'string' && data.reply.trim())
+        ? data.reply.trim()
+        : null;
+    } catch (_) {
+      return null;
+    }
   }
 
   function sendHomeChat(text) {
@@ -429,16 +447,25 @@
       var conv = document.getElementById('g3-conversation');
       if (!conv) return;
       appendBubble(conv, msg, 'user');
-      setTimeout(function () { appendBubble(conv, getReply(msg), 'bot'); }, 500);
+      var thinking = appendBubble(conv, '…', 'bot');
+      fetchAIReply(msg).then(function (reply) {
+        thinking.textContent = reply !== null ? reply : getReply(msg);
+        conv.scrollTop = conv.scrollHeight;
+      });
     }, 120);
   }
 
   function sendActiveChat(text) {
     if (!text.trim()) return;
+    var msg = text.trim();
     var conv = document.getElementById('chat-conversation');
     if (!conv) return;
-    appendBubble(conv, text.trim(), 'user');
-    setTimeout(function () { appendBubble(conv, getReply(text), 'bot'); }, 500);
+    appendBubble(conv, msg, 'user');
+    var thinking = appendBubble(conv, '…', 'bot');
+    fetchAIReply(msg).then(function (reply) {
+      thinking.textContent = reply !== null ? reply : getReply(msg);
+      conv.scrollTop = conv.scrollHeight;
+    });
   }
 
   // ── 8. Event bindings ─────────────────────────────────────────────────
