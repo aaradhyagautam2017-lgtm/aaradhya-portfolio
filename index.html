@@ -4,6 +4,8 @@
   <head>
     <meta charset="UTF-8">
     <title>ScrollTriggering Through a Tube — GSAP ScrollTrigger Demo</title>
+    <!-- Preload the preloader backdrop so it paints immediately instead of after CSS parses. -->
+    <link rel="preload" as="image" href="assets/images/preloader%20image.webp" fetchpriority="high" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Saira:wght@600;700&display=swap" rel="stylesheet" />
@@ -171,7 +173,9 @@
       width: 0; height: 0;
       pointer-events: none;
       z-index: 99999;
-      mix-blend-mode: difference;
+      /* NOTE: deliberately no mix-blend-mode. Blending over the .glass-panel
+         backdrop-filter blur causes rectangular repaint seams + jitter in
+         Blink. Solid white reads cleanly on the dark UI without that cost. */
     }
     .target-cursor-dot {
       position: absolute;

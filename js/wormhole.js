@@ -353,9 +353,15 @@ tl.to(tubePerc, {
    }
 });
 
+// When the user enters the portfolio the tunnel is hidden, but display:none does
+// NOT stop this loop — the GPU would keep drawing the particles + bloom forever.
+// stopWormhole() (called from main.js on transition) flips this flag so the loop,
+// and the two text loops below, halt and free the main thread + GPU.
+window.__wormholeStopped = false;
+window.stopWormhole = function () { window.__wormholeStopped = true; };
+
 function render(){
-  //texture.offset.x+=.004
-  //texture2.needsUpdate = true;
+  if (window.__wormholeStopped) return;
   currentCameraPercentage = cameraTargetPercentage
 
   camera.rotation.y += (cameraRotationProxyX - camera.rotation.y) / 15;
@@ -437,7 +443,10 @@ var spikeyTexture = (function() {
 }());
 
 
-var particleCount = 20000,
+// 5000 per system (15k total, down from 60k). The field is additive-blended and
+// bloomed, so a quarter of the points looks all but identical while the first
+// frame — and every frame — is dramatically cheaper.
+var particleCount = 5000,
     particles1 = new THREE.Geometry(),
     particles2 = new THREE.Geometry(),
     particles3 = new THREE.Geometry(),
@@ -535,6 +544,7 @@ document.addEventListener('mousemove', function(evt) {
   }
 
   function animateIntroText() {
+    if (window.__wormholeStopped) return;
     var progress = getProgress();
 
     if (progress <= 0.08) {
@@ -615,6 +625,7 @@ document.addEventListener('mousemove', function(evt) {
   }
 
   function animateTunnelTexts() {
+    if (window.__wormholeStopped) return;
     var progress = getProgress();
 
     texts.forEach(function(item, i) {

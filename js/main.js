@@ -26,6 +26,11 @@
       if (scrollTarget) scrollTarget.style.display = 'none';
       if (vignette)     vignette.style.display      = 'none';
 
+      // Stop the Three.js render loop. Hiding the canvas alone leaves the tunnel
+      // drawing 15k particles + bloom every frame behind the portfolio — the
+      // single biggest source of in-portfolio lag.
+      if (window.stopWormhole) window.stopWormhole();
+
       // Step 3: snap scroll to top of portfolio
       window.scrollTo(0, 0);
 
