@@ -162,6 +162,38 @@
       #site-preloader .preloader-wrapper.exit-active #title-frame { opacity: 0; transform: translateY(12px); }
       #site-preloader .preloader-wrapper.exit-active #loading-module { opacity: 0; transition: opacity 800ms cubic-bezier(0.25, 1, 0.5, 1); }
     </style>
+  <style id="target-cursor-styles">
+    * { cursor: none !important; }
+
+    .target-cursor-wrapper {
+      position: fixed;
+      top: 0; left: 0;
+      width: 0; height: 0;
+      pointer-events: none;
+      z-index: 99999;
+      mix-blend-mode: difference;
+    }
+    .target-cursor-dot {
+      position: absolute;
+      left: 0; top: 0;
+      width: 4px; height: 4px;
+      background: #fff;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      will-change: transform;
+    }
+    .target-cursor-corner {
+      position: absolute;
+      left: 0; top: 0;
+      width: 8px; height: 8px;
+      border: 2px solid #fff;
+      will-change: transform;
+    }
+    .corner-tl { border-right: none; border-bottom: none; }
+    .corner-tr { border-left:  none; border-bottom: none; }
+    .corner-br { border-left:  none; border-top:    none; }
+    .corner-bl { border-right: none; border-top:    none; }
+  </style>
   </head>
 
   <body class="preloading">
@@ -1435,6 +1467,287 @@
         });
     }());
     </script>
+  <!-- ── Target Cursor ──────────────────────────────────────────────────── -->
+  <div id="target-cursor" class="target-cursor-wrapper">
+    <div class="target-cursor-dot"></div>
+    <div class="target-cursor-corner corner-tl"></div>
+    <div class="target-cursor-corner corner-tr"></div>
+    <div class="target-cursor-corner corner-br"></div>
+    <div class="target-cursor-corner corner-bl"></div>
+  </div>
+
+  <script>
+  (function () {
+    var hasTouchScreen = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    var isSmallScreen  = window.innerWidth <= 768;
+    var mobileRx       = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i;
+    var isMobile       = (hasTouchScreen && isSmallScreen) || mobileRx.test((navigator.userAgent || '').toLowerCase());
+    if (isMobile) return;
+
+    var TARGET_SEL   = [
+      /* wormhole — jump to portfolio CTA */
+      '#skip-btn',
+      /* G01 — project cards (clickable, navigate to project detail) */
+      '.project-card',
+      /* G01 — profile CTAs */
+      '.profile-btn',
+      /* G01 — chat chips & send */
+      '.terminal-chip',
+      '.chat-send',
+      /* G01 — social links */
+      '.social-icon',
+      /* G02 — project navigation (back / prev / next) */
+      '#project-back',
+      '#project-prev',
+      '#project-next',
+      /* G02 — carousel slide controls */
+      '.carousel-btn',
+      /* G02 — overview actions */
+      '.g2-cta-btn',
+      '.g2-nda-btn',
+      /* G03 — chat back link */
+      '#chat-back-link',
+      /* G04 — about back + contact buttons */
+      '#about-back',
+      '.glass-btn',
+      /* Orbit — nav buttons */
+      '.nav-logo',
+      '.nav-back-button'
+    ].join(', ');
+    var SPIN_DUR     = 2;
+    var HOVER_DUR    = 0.2;
+    var PARALLAX     = true;
+    var BW           = 2;   // border width
+    var CS           = 8;   // corner size
+
+    var cursor  = document.getElementById('target-cursor');
+    var dot     = cursor.querySelector('.target-cursor-dot');
+    var corners = Array.from(cursor.querySelectorAll('.target-cursor-corner'));
+
+    /* ── containing-block helpers (handles transformed ancestors) ── */
+    function getContainingBlock(el) {
+      var node = el && el.parentElement;
+      while (node && node !== document.documentElement) {
+        var s = getComputedStyle(node);
+        if (s.transform !== 'none' || s.perspective !== 'none' || s.filter !== 'none' ||
+            s.willChange.indexOf('transform') !== -1 || s.willChange.indexOf('perspective') !== -1 ||
+            s.willChange.indexOf('filter') !== -1 || /paint|layout|strict|content/.test(s.contain)) {
+          return node;
+        }
+        node = node.parentElement;
+      }
+      return null;
+    }
+    function getOffset(block) {
+      if (!block) return { x: 0, y: 0 };
+      var r = block.getBoundingClientRect();
+      return { x: r.left + block.clientLeft, y: r.top + block.clientTop };
+    }
+
+    var containingBlock = getContainingBlock(cursor);
+
+    /* ── initial GSAP state ── */
+    document.body.style.cursor = 'none';
+    var off = getOffset(containingBlock);
+    gsap.set(cursor, {
+      xPercent: -50, yPercent: -50,
+      x: window.innerWidth  / 2 - off.x,
+      y: window.innerHeight / 2 - off.y
+    });
+    /* corners default positions (match the CSS bracket look) */
+    gsap.set(corners[0], { x: -CS * 1.5, y: -CS * 1.5 }); // TL
+    gsap.set(corners[1], { x:  CS * 0.5, y: -CS * 1.5 }); // TR
+    gsap.set(corners[2], { x:  CS * 0.5, y:  CS * 0.5 }); // BR
+    gsap.set(corners[3], { x: -CS * 1.5, y:  CS * 0.5 }); // BL
+
+    /* ── spin timeline ── */
+    var spinTl = gsap.timeline({ repeat: -1 })
+      .to(cursor, { rotation: '+=360', duration: SPIN_DUR, ease: 'none' });
+
+    /* ── state ── */
+    var activeTarget      = null;
+    var currentLeave      = null;
+    var resumeTimer       = null;
+    var cornerTargetPos   = null;
+    var activeStrength    = { current: 0 };
+    var isActive          = false;
+
+    /* ── parallax ticker ── */
+    function tickerFn() {
+      if (!cornerTargetPos || !isActive) return;
+      var strength = activeStrength.current;
+      if (strength === 0) return;
+      var cx = gsap.getProperty(cursor, 'x');
+      var cy = gsap.getProperty(cursor, 'y');
+      corners.forEach(function (c, i) {
+        var curX = gsap.getProperty(c, 'x');
+        var curY = gsap.getProperty(c, 'y');
+        var tgX  = cornerTargetPos[i].x - cx;
+        var tgY  = cornerTargetPos[i].y - cy;
+        var dur  = strength >= 0.99 ? (PARALLAX ? 0.2 : 0) : 0.05;
+        gsap.to(c, {
+          x: curX + (tgX - curX) * strength,
+          y: curY + (tgY - curY) * strength,
+          duration: dur,
+          ease: dur === 0 ? 'none' : 'power1.out',
+          overwrite: 'auto'
+        });
+      });
+    }
+
+    /* ── mouse move ── */
+    window.addEventListener('mousemove', function (e) {
+      var o = getOffset(containingBlock);
+      gsap.to(cursor, { x: e.clientX - o.x, y: e.clientY - o.y, duration: 0.1, ease: 'power3.out' });
+    });
+
+    /* ── scroll: re-check if still over target ── */
+    window.addEventListener('scroll', function () {
+      if (!activeTarget || !currentLeave) return;
+      var o  = getOffset(containingBlock);
+      var mx = gsap.getProperty(cursor, 'x') + o.x;
+      var my = gsap.getProperty(cursor, 'y') + o.y;
+      var el = document.elementFromPoint(mx, my);
+      if (!el || (el !== activeTarget && el.closest(TARGET_SEL) !== activeTarget)) currentLeave();
+    }, { passive: true });
+
+    /* ── click feedback ── */
+    window.addEventListener('mousedown', function () {
+      gsap.to(dot,    { scale: 0.7, duration: 0.3 });
+      gsap.to(cursor, { scale: 0.9, duration: 0.2 });
+    });
+    window.addEventListener('mouseup', function () {
+      gsap.to(dot,    { scale: 1, duration: 0.3 });
+      gsap.to(cursor, { scale: 1, duration: 0.2 });
+    });
+
+    /* ── enter handler ── */
+    window.addEventListener('mouseover', function (e) {
+      /* walk up to nearest glass-panel */
+      var node = e.target;
+      var target = null;
+      while (node && node !== document.body) {
+        if (node.matches && node.matches(TARGET_SEL)) { target = node; break; }
+        node = node.parentElement;
+      }
+      if (!target || activeTarget === target) return;
+
+      /* clean up previous target */
+      if (activeTarget && currentLeave) activeTarget.removeEventListener('mouseleave', currentLeave);
+      currentLeave = null;
+      if (resumeTimer) { clearTimeout(resumeTimer); resumeTimer = null; }
+
+      activeTarget = target;
+      corners.forEach(function (c) { gsap.killTweensOf(c); });
+      gsap.killTweensOf(cursor, 'rotation');
+      spinTl.pause();
+      gsap.set(cursor, { rotation: 0 });
+
+      var rect = target.getBoundingClientRect();
+      var o    = getOffset(containingBlock);
+      var cx   = gsap.getProperty(cursor, 'x');
+      var cy   = gsap.getProperty(cursor, 'y');
+
+      cornerTargetPos = [
+        { x: rect.left  - BW       - o.x,  y: rect.top    - BW       - o.y },
+        { x: rect.right + BW - CS  - o.x,  y: rect.top    - BW       - o.y },
+        { x: rect.right + BW - CS  - o.x,  y: rect.bottom + BW - CS  - o.y },
+        { x: rect.left  - BW       - o.x,  y: rect.bottom + BW - CS  - o.y }
+      ];
+
+      isActive = true;
+      gsap.ticker.add(tickerFn);
+      gsap.to(activeStrength, { current: 1, duration: HOVER_DUR, ease: 'power2.out' });
+
+      corners.forEach(function (c, i) {
+        gsap.to(c, {
+          x: cornerTargetPos[i].x - cx,
+          y: cornerTargetPos[i].y - cy,
+          duration: 0.2, ease: 'power2.out'
+        });
+      });
+
+      /* ── leave handler ── */
+      var leaveHandler = function () {
+        gsap.ticker.remove(tickerFn);
+        isActive         = false;
+        cornerTargetPos  = null;
+        activeTarget     = null;
+        gsap.set(activeStrength, { current: 0, overwrite: true });
+
+        corners.forEach(function (c) { gsap.killTweensOf(c); });
+        var defaults = [
+          { x: -CS * 1.5, y: -CS * 1.5 },
+          { x:  CS * 0.5, y: -CS * 1.5 },
+          { x:  CS * 0.5, y:  CS * 0.5 },
+          { x: -CS * 1.5, y:  CS * 0.5 }
+        ];
+        var tl = gsap.timeline();
+        corners.forEach(function (c, i) {
+          tl.to(c, { x: defaults[i].x, y: defaults[i].y, duration: 0.3, ease: 'power3.out' }, 0);
+        });
+
+        resumeTimer = setTimeout(function () {
+          if (!activeTarget) {
+            var rot = gsap.getProperty(cursor, 'rotation') % 360;
+            spinTl.kill();
+            spinTl = gsap.timeline({ repeat: -1 })
+              .to(cursor, { rotation: '+=360', duration: SPIN_DUR, ease: 'none' });
+            gsap.to(cursor, {
+              rotation: rot + 360,
+              duration: SPIN_DUR * (1 - rot / 360),
+              ease: 'none',
+              onComplete: function () { spinTl.restart(); }
+            });
+          }
+          resumeTimer = null;
+        }, 50);
+
+        target.removeEventListener('mouseleave', leaveHandler);
+        currentLeave = null;
+      };
+
+      currentLeave = leaveHandler;
+      target.addEventListener('mouseleave', leaveHandler);
+    }, { passive: true });
+
+    /* ── resize: re-detect containing block ── */
+    window.addEventListener('resize', function () {
+      containingBlock = getContainingBlock(cursor);
+    });
+
+    /* ── shared opacity resolver: orbit > wormhole > normal ── */
+    var orbitScreen    = document.getElementById('screen-orbit');
+    var wormholeCanvas = document.querySelector('canvas.experience');
+
+    function updateCursorOpacity() {
+      var orbitActive = orbitScreen && orbitScreen.style.pointerEvents === 'auto';
+      if (orbitActive) {
+        cursor.style.opacity       = '0';
+        document.body.style.cursor = '';
+        if (activeTarget && currentLeave) currentLeave();
+        return;
+      }
+      var inTunnel = wormholeCanvas && wormholeCanvas.style.display !== 'none';
+      cursor.style.opacity       = inTunnel ? '0.6' : '1';
+      document.body.style.cursor = 'none';
+    }
+
+    /* set initial state: wormhole is active on first load */
+    updateCursorOpacity();
+
+    if (orbitScreen) {
+      new MutationObserver(updateCursorOpacity)
+        .observe(orbitScreen, { attributes: true, attributeFilter: ['style'] });
+    }
+
+    if (wormholeCanvas) {
+      new MutationObserver(updateCursorOpacity)
+        .observe(wormholeCanvas, { attributes: true, attributeFilter: ['style'] });
+    }
+  }());
+  </script>
+
   </body>
 
 </html>

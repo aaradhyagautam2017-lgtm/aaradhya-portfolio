@@ -1259,6 +1259,11 @@ body{
 }
 
 /* ── HUD INSTRUMENTATION ── */
+.hud-corner,
+.hud-bracket,
+.hud-frame-layer,
+.hud-edge-tick { display: none !important; }
+
 .hud-corner {
     position: absolute;
     width: 8px; height: 8px;

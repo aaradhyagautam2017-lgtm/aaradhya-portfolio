@@ -48,6 +48,10 @@
     padding: 0;
 }
 
+/* Restore native cursor on the orbit page — overrides global cursor:none */
+#screen-orbit,
+#screen-orbit * { cursor: auto !important; }
+
 /* Scrollbar */
 #screen-orbit::-webkit-scrollbar { width: 8px; }
 #screen-orbit::-webkit-scrollbar-track { background: var(--color-bg-base); }
