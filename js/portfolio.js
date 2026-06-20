@@ -343,14 +343,6 @@
     var overviewEl = document.querySelector('#overview-panel .overview-text');
     if (overviewEl) overviewEl.textContent = p.overview || '';
 
-    // Behance link
-    var behanceEl = document.querySelector('#overview-panel .g2-cta-btn');
-    if (behanceEl) behanceEl.href = p.behance || '#';
-
-    // NDA wrapper — show only if project is under NDA
-    var ndaWrapper = document.querySelector('#overview-panel .g2-nda-wrapper');
-    if (ndaWrapper) ndaWrapper.style.display = p.nda ? 'block' : 'none';
-
     // Carousel images
     carouselIdx = 0;
     var carousel = document.querySelector('.hero-carousel');
