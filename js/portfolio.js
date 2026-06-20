@@ -297,12 +297,10 @@
 
     if (screenName === 'project') populateProject(state.project);
 
-    requestAnimationFrame(function () {
-      requestAnimationFrame(function () {
-        next.style.opacity       = '1';
-        next.style.pointerEvents = 'auto';
-      });
-    });
+    setTimeout(function () {
+      next.style.opacity       = '1';
+      next.style.pointerEvents = 'auto';
+    }, 180);
   }
 
   // ── 6. Populate G-02 ──────────────────────────────────────────────────
@@ -629,7 +627,7 @@
       s.style.display       = 'flex';
       s.style.opacity       = '0';
       s.style.pointerEvents = 'none';
-      s.style.transition    = 'opacity 0.30s ease';
+      s.style.transition    = 'opacity 0.35s ease';
     });
     scaleLayout();
     window.addEventListener('resize', scaleLayout);
