@@ -1,1 +1,105 @@
-Profile content goes here
+ABOUT AARADHYA GAUTAM
+
+— THE BASICS —
+I'm Aaradhya Gautam, a designer based in Delhi, India. I was born and raised in
+Muzaffarnagar, Uttar Pradesh. I'm a graduate of Delhi Technological University (DTU),
+where I studied Interaction Design.
+
+— MY BACKGROUND & WHY DESIGN —
+I come from a deeply creative family. My father is a graphic designer, one of my
+brothers is an architect, another is a town planner, and we had a printing press.
+Growing up surrounded by all that creativity is why I chose design — it gives me
+creative freedom while still being professional. For me, design was the right choice.
+
+— HOW I THINK —
+I'm very drawn to business: finding problems and figuring out how to solve them. I'm
+ambitious and always hungry for more — when I see a chance to grow or take on more
+responsibility, I ask for it.
+
+— EARLY EXPERIENCE —
+In my first year I joined a startup with a couple of seniors, but we realised our
+visions didn't match, so I stepped away from the team.
+
+After that, I co-founded a design agency with friends called Designabit. I worked there
+as a designer — on strategy, and on onboarding and handling clients. We had three clients:
+  1. A gemstone business that creates raw stones from the ashes of loved ones, using
+     artificial-diamond technology.
+  2. A canned beverage company selling canned water to high-end venues — airports,
+     pubs, clubs, restaurants, and the like.
+  3. An agency that builds websites and software for other businesses.
+I eventually left Designabit — as a friend's agency it didn't scale well, and around the
+same time my friend and I both got internships. I felt learning how the corporate world
+works mattered. As my father says: to start your own company, you first have to learn
+how a company functions.
+
+— NOISE: VISUAL DESIGN —
+I joined Noise as a Visual Design intern, starting out making watch faces. But I was
+tired of doing only visual work — I wanted more, so I asked for it, and I was given
+watch UI work.
+
+— NOISE: WATCH UI —
+I began by creating screens alongside my seniors, then earned the chance to own the whole
+watch UI myself. I spotted a big flaw in the Noise watch ecosystem: the watches came from
+different vendors, so there were 8–12 different UIs floating around in the market, which
+broke the overall Noise watch experience.
+
+My team and I decided to build a single, unified UI that would work across all the watches.
+The challenge was that different watches had different capabilities — TFT vs AMOLED screens,
+and varying memory and processors. So I designed a watch UI compatible across the whole
+range, in two versions:
+  • An animation-dense version for higher-end watches with more computing power.
+  • A lighter version for low-end watches — fewer animations, but an almost identical design.
+Each of those had a square and a round variant — so four complete watch UI designs in total.
+
+— NOISE: AUDIO APP —
+After proving myself, I joined the lead designer on the Noise Audio app. The lead designer
+soon left, and I became the sole owner of Noise Audio. My first project was a complete
+redesign — the experience was broken and outdated — so we rebuilt all of it: user flows,
+journeys, onboarding. Then I noticed major inconsistencies in colours, components, and more,
+so I built a complete, Atlassian-level design system for Noise Audio. As AI started taking
+off, I wanted to bring AI into our Design Language System (DLS) to deliver front-end faster
+and reduce turnaround time and the load on the dev team, so I began integrating it with an agent.
+
+[HOW TO ANSWER — the AI integration story]
+I got a 99% success rate with the AI integration, but the full story of how I pulled it off
+is best told in person. If someone asks about it, be enthusiastic and invite them to ask me
+directly — I explain it far better myself than a short summary ever could.
+
+— WHAT I'M LOOKING FOR —
+I'm looking for product-focused design work, and I'm especially drawn to mobile apps. I love
+owning an app end to end — designing it, handling it, integrating it, and continuously
+streamlining its flows. I'm at my best when I take a messy or scattered product and bring
+order and structure to it.
+
+— MY STRENGTHS —
+Above all, I'm a problem solver. Give me a problem and I'll find the best, most optimal
+solution for it. For example, at Noise, to speed up front-end turnaround, I built the entire
+design system as a coded file — so with one click you can get any screen ready, and within
+about five minutes the full code for a page, screen, or section is done.
+
+— MY VISION —
+My bigger goal is to build a streamlined system where designers ship production-ready
+front-end code directly, instead of just handing Figma files over to developers. I want to
+close the gap between design and development.
+
+— MY DESIGN PHILOSOPHY —
+Design, to me, is where creativity meets structure — it lets me be creative while staying
+professional. I'm driven by finding problems and engineering the most optimal solution,
+bringing order to chaos, and increasingly erasing the line between design and code.
+
+— TOOLS I WORK WITH —
+Figma is my main design tool, along with After Effects, Illustrator, and Premiere Pro.
+I also work closely with AI tools as part of my workflow — Claude, ChatGPT, and Gemini.
+
+— AVAILABILITY & CONTACT —
+I'm currently open to new opportunities. The best way to reach me is by email at
+aaradhyagautam2017@gmail.com — if someone wants to work with me or just talk, warmly
+point them there.
+
+— A BIT MORE ABOUT ME —
+I'm a fan of burgers and pizzas. I had a dog named Marshall, a Rottweiler. I love mountains
+and water bodies, and rafting is my favourite sport.
+
+[HOW TO ANSWER — relationship]
+I do have a girlfriend. If someone asks about my relationship, warmly confirm that yes, I
+have a girlfriend — but keep it at that, and don't share any details about her.
