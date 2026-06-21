@@ -306,6 +306,7 @@
   // ── 6. Populate G-02 ──────────────────────────────────────────────────
   var carouselIdx   = 0;
   var carouselTimer = null;
+  var autoScrollEnabled = true;
 
   function stopCarouselTimer() {
     if (carouselTimer) { clearInterval(carouselTimer); carouselTimer = null; }
@@ -359,7 +360,7 @@
         slide.style.transform = (i === 0) ? 'translateX(0)' : 'translateX(100%)';
         carousel.appendChild(slide);
       });
-      if (imgs.length > 1) startCarouselTimer();
+      if (imgs.length > 1 && autoScrollEnabled) startCarouselTimer();
     }
   }
 
@@ -565,6 +566,25 @@
     if (projNext) projNext.addEventListener('click', function () {
       var n = (state.project % 3) + 1;
       goTo('project', n);
+    });
+
+    // G-02 · carousel auto-scroll toggle
+    var autoscrollToggle = document.getElementById('autoscroll-toggle');
+    if (autoscrollToggle) autoscrollToggle.addEventListener('click', function () {
+      autoScrollEnabled = !autoScrollEnabled;
+      var dot   = document.getElementById('autoscroll-dot');
+      var label = document.getElementById('autoscroll-label');
+      if (autoScrollEnabled) {
+        autoscrollToggle.style.border = '1px solid rgba(147,197,253,0.35)';
+        if (dot)   dot.style.background = 'rgba(147,197,253,0.9)';
+        if (label) label.style.color    = 'rgba(147,197,253,0.85)';
+        startCarouselTimer();
+      } else {
+        autoscrollToggle.style.border = '1px solid rgba(255,255,255,0.1)';
+        if (dot)   dot.style.background = 'rgba(255,255,255,0.15)';
+        if (label) label.style.color    = 'rgba(255,255,255,0.3)';
+        stopCarouselTimer();
+      }
     });
 
     // G-03 · back / close
