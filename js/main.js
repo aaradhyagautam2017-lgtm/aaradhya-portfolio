@@ -44,12 +44,21 @@
     }, 400);
   }
 
-  // Trigger at end of wormhole scroll
+  // Trigger at end of wormhole scroll.
+  //
+  // We fire within a small pixel tolerance of the bottom instead of requiring
+  // window.scrollY to hit maxScroll exactly. On Retina / high-DPI displays (most
+  // Macs) the browser snaps the scroll offset to physical pixel boundaries, so
+  // window.scrollY tops out a fraction of a pixel BELOW maxScroll and a strict
+  // `>=` never becomes true — the white flash + portfolio transition would never
+  // fire (the user just stalls at the end of the tunnel). On Windows @1x scrollY
+  // reaches the integer max exactly, which is why this only broke on Mac. The
+  // tolerance makes "reached the end" reliable regardless of devicePixelRatio.
   if (scrollTarget) {
     window.addEventListener('scroll', function () {
       if (transitionFired) return;
       var maxScroll = scrollTarget.offsetHeight - window.innerHeight;
-      if (window.scrollY >= maxScroll) {
+      if (window.scrollY >= maxScroll - 2) {
         triggerTransition();
       }
     }, { passive: true });
